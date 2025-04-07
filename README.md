@@ -7,7 +7,10 @@
 - Killstreak Leaderboard
 - Death Leaderboard
 - Announce kill streaks
-- Optionally include current level or maximum level
+- Optionally announce max level each used in the fight
+- Optionally announce player assists
+- Optionally announce kill steals by mobs
+- Discord webhook integration
  
 ## Upcoming features
 - Announce multi-kills
@@ -40,10 +43,15 @@ AnnounceKillstreak = true
 # Default value: true
 IncludeLevel = true
 
-## Use max gear level instead of current gear level.
+## Use max gear level instead of current gear level (This will override userMaxPerFightLevel).
 # Setting type: Boolean
 # Default value: false
-UseMaxLevel = true
+UseMaxLevel = false
+
+## Use max gear used in the current fight.
+# Setting type: Boolean
+# Default value: true
+UseMaxPerFightLevel = true
 
 ```
 

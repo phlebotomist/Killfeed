@@ -53,6 +53,20 @@ public class Commands
 		ctx.Reply(sb2.ToString());
 	}
 
+	[Command("test", shortHand: "t", description: "test command for debuging")]
+	public void GetLastDefenseData(ChatCommandContext ctx, string name)
+	{
+		// get the players name who called this command
+		// var playerName = ctx.User.Name.ToString();
+		var playerName = name;
+		var defList = PlayerHitStore.GetDefenses(playerName);
+		var attackerNames = PlayerHitStore.GetRecentAttackersHighestLevel(playerName);
+		// print the length of the defList
+		ctx.Reply("" + defList.Count + " defenses found for " + playerName);
+		ctx.Reply("Recent attackers: " + string.Join(", ", attackerNames));
+	}
+
+
 	[Command("killfeed", shortHand: "kf", description: "Shows Killfeed info")]
 	public void KillfeedCommand(ChatCommandContext ctx)
 	{

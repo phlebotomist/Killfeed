@@ -45,7 +45,24 @@ public static class VampireDownedHook
 
 		if (unitKiller)
 		{
-			Plugin.Logger.LogInfo($"{victim.Name} was killed by a unit. [Not currently tracked]");
+			if (!Settings.AnounceUnitKillSteals)
+			{
+				Plugin.Logger.LogInfo($"{victim.Name} was killed by a unit but announcement turned off");
+				return;
+			}
+
+			var victimName = victim.Name.ToString();
+			var assisters = PlayerHitStore.GetRecentAttackersHighestLevel(victimName);
+			if (assisters.Count == 0)
+			{
+				Plugin.Logger.LogInfo($"{victim.Name} was killed by a unit, no other vampires involved");
+				return;
+			}
+
+			// TODO: get highest level in fight if the setting is enabled
+			int victimLvl = victimEntity.Has<Equipment>(out var victimGS) ? (int)Math.Round(victimGS.GetFullLevel()) : -1;
+
+			DataStore.HandleUnitKillSteal(victimName, victimLvl, assisters);
 			return;
 		}
 
@@ -67,9 +84,25 @@ public static class VampireDownedHook
 
 		var location = victimEntity.Read<LocalToWorld>();
 
-		int victimLevel = victimEntity.Has<Equipment>(out var victimEquipment) ? (int)Math.Round(victimEquipment.GetFullLevel()) : -1;
-		int killerLevel = killerEntity.Has<Equipment>(out var killerEquipment) ? (int)Math.Round(killerEquipment.GetFullLevel()) : -1;
+		int victimCurrentLevel = victimEntity.Has<Equipment>(out var victimEquipment) ? (int)Math.Round(victimEquipment.GetFullLevel()) : -1;
+		int killerCurrentLevel = killerEntity.Has<Equipment>(out var killerEquipment) ? (int)Math.Round(killerEquipment.GetFullLevel()) : -1;
 
-		DataStore.RegisterKillEvent(victim, killer, location.Position, victimLevel, killerLevel);
+
+		if (Settings.UseMaxPerFightLevel)
+		{
+			var attackers = PlayerHitStore.GetRecentAttackersHighestLevel(victim.Name.ToString());
+			// find the killer in the attackers list and set the lvl to that level
+			if (attackers.TryGetValue(killer.Name.ToString(), out var maxLevel))
+			{
+				killerCurrentLevel = maxLevel;
+			}
+			else
+			{
+				killerCurrentLevel = -100;
+			}
+		}
+
+
+		DataStore.RegisterKillEvent(victim, killer, location.Position, victimCurrentLevel, killerCurrentLevel);
 	}
 }

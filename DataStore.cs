@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -11,6 +12,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine.Jobs;
 using Random = System.Random;
+using Microsoft.VisualBasic;
 
 namespace Killfeed;
 public class DataStore
@@ -224,7 +226,28 @@ public class DataStore
 		// while this is naieve and whole file, in append or WAL this might be better
 		WriteToDisk();
 	}
+	private static string GetFormatedAssistString(Dictionary<string, int> assisters)
+	{
+		var msg = "";
+		foreach (var assist in assisters)
+		{
+			msg += $"{Markup.Highlight(assist.Key)} ({Markup.Secondary(assist.Value)})";
+			if (assisters.Last().Key != assist.Key)
+			{
+				msg += ", ";
+			}
+		}
+		return msg;
+	}
+	public static void HandleUnitKillSteal(string victimName, int victimLvl, Dictionary<string, int> assisters)
+	{
+		Plugin.Logger.LogInfo($"{victimName} was killed by a unit. while fighting: {string.Join(", ", assisters)}");
 
+
+		var deathmsg = $"{Markup.Highlight(victimName)} ({Markup.Secondary(victimLvl)}) was killed by a unit while fighting: {GetFormatedAssistString(assisters)}";
+		ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, deathmsg);
+
+	}
 	private static void AnnounceKill(PlayerStatistics victimUser, PlayerStatistics killerUser, int lostStreakAmount)
 	{
 		if (!Settings.AnnounceKills) return;
@@ -247,7 +270,17 @@ public class DataStore
 			_ => null
 		};
 
-		ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, Markup.Prefix + message);
+		var helpersDict = PlayerHitStore.GetRecentAttackersHighestLevel(victimUser.LastName);
+
+		// Filter out the killer and format each entry to include the level.
+		var filteredHelpers = helpersDict
+			.Where(x => x.Key != killerUser.LastName)
+			.ToDictionary(x => x.Key, x => x.Value);
+
+
+		var assistsString = GetFormatedAssistString(filteredHelpers);
+
+		ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, Markup.Prefix + message + assistsString);
 
 		if (!string.IsNullOrEmpty(killMsg) && Settings.AnnounceKillstreak)
 		{
