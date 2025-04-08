@@ -17,9 +17,20 @@ public static class VampireDownedHook
 		foreach (var entity in downedEvents)
 		{
 			ProcessVampireDowned(entity);
+			CleanupVampireHits(entity); // clean up hit data so if they are revived assists don't bleed over into next fight
 		}
 	}
 
+	private static void CleanupVampireHits(Entity entity)
+	{
+		if (!VampireDownedServerEventSystem.TryFindRootOwner(entity, 1, VWorld.Server.EntityManager, out var victimEntity))
+		{
+			Plugin.Logger.LogMessage("Couldn't get victim entity");
+			return;
+		}
+
+		PlayerHitStore.ResetPlayerHitInteractions(victimEntity.Read<PlayerCharacter>().Name.ToString());
+	}
 	private static void ProcessVampireDowned(Entity entity)
 	{
 

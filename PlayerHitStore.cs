@@ -23,6 +23,7 @@ public class PlayerHitData
 // Static, in-memory store for all player hit interactions.
 public static class PlayerHitStore
 {
+    private const double PVP_WINDOW = 30.0; // seconds
     // Dictionary keyed by player name (case-insensitive) holding each player's hit data.
     private static readonly Dictionary<string, PlayerHitData> interactionsByPlayer =
         new Dictionary<string, PlayerHitData>(StringComparer.OrdinalIgnoreCase);
@@ -44,6 +45,13 @@ public static class PlayerHitStore
         // AddAttack(attackerName, hit);
 
         AddDefense(victimName, hit);
+
+        // it might be over kill to check this but in the case someone is really good and never dies and fights a lot we should have way to clean up their data every once and a while.
+        // Server restart should do this as well but better to be safe than sorry.
+        if (InteractionsByPlayer.TryGetValue(victimName, out var victimHitData) && victimHitData.Defenses.Count >= 500)
+        {
+            CleanupOldHitInteractionsByPlayer(victimName);
+        }
     }
 
     private static void AddAttack(string playerName, HitInteraction hit)
@@ -92,7 +100,7 @@ public static class PlayerHitStore
     /// Returns a dictionary mapping attacker names to their highest level recorded among defense hits
     /// for the given player within the specified pvp time window (in seconds).
     /// </summary>
-    public static Dictionary<string, int> GetRecentAttackersHighestLevel(string playerName, double pvpWindowSeconds = 30.0)
+    public static Dictionary<string, int> GetRecentAttackersHighestLevel(string playerName, double pvpWindowSeconds = PVP_WINDOW)
     {
         var result = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         if (!interactionsByPlayer.TryGetValue(playerName, out var hitData))
@@ -122,5 +130,35 @@ public static class PlayerHitStore
     }
 
 
+    public static void CleanupOldHitInteractionsByPlayer(string playerName, double pvpWindowSeconds = PVP_WINDOW)
+    {
+
+        if (!interactionsByPlayer.TryGetValue(playerName, out var hitData))
+            return;
+
+        Plugin.Logger.LogMessage($"CLEANING up hit interactions for player: {playerName}");
+
+        long currentTicks = Stopwatch.GetTimestamp();
+        long windowTicks = (long)(pvpWindowSeconds * Stopwatch.Frequency);
+
+        // Remove any hit interactions from the Desfenses list that are outside the current PvP window.
+        var sizeBefore = hitData.Defenses.Count;
+        hitData.Defenses.RemoveAll(hit => (currentTicks - hit.Timestamp) > windowTicks);
+        var sizeAfter = hitData.Defenses.Count;
+        Plugin.Logger.LogMessage($"CLEANED up [{sizeAfter - sizeBefore}] old hit interactions for player: {playerName}");
+    }
+    public static void ResetPlayerHitInteractions(string playerName)
+    {
+        if (interactionsByPlayer.TryGetValue(playerName, out var hitData))
+        {
+            Plugin.Logger.LogMessage($"RESETTING {playerName}'s hit interactions.");
+            hitData.Attacks.Clear();
+            hitData.Defenses.Clear();
+        }
+        else
+        {
+            Plugin.Logger.LogMessage($"No hit interactions found for {playerName} to reset.");
+        }
+    }
     public static void Clear() => interactionsByPlayer.Clear();
 }
