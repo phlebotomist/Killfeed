@@ -12,6 +12,7 @@ public struct HitInteraction
     public string VictimName;
     public int VictimLevel;
     public long Timestamp;
+    public int DmgSourceGUID;
 }
 
 public class PlayerHitData
@@ -30,7 +31,12 @@ public static class PlayerHitStore
 
     public static IReadOnlyDictionary<string, PlayerHitData> InteractionsByPlayer => interactionsByPlayer;
 
-    public static void AddHit(string attackerName, int attackerLevel, string victimName, int victimLevel)
+    public static void AddHit(
+        string attackerName,
+        int attackerLevel,
+        string victimName,
+        int victimLevel,
+        int dmgSourceGUID)
     {
         var hit = new HitInteraction
         {
@@ -38,7 +44,8 @@ public static class PlayerHitStore
             AttackerLevel = attackerLevel,
             VictimName = victimName,
             VictimLevel = victimLevel,
-            Timestamp = Stopwatch.GetTimestamp()
+            Timestamp = Stopwatch.GetTimestamp(),
+            DmgSourceGUID = dmgSourceGUID
         };
 
         // Currently no use for attack list so we don't add to it.
