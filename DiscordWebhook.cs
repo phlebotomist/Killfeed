@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Killfeed;
@@ -54,27 +55,41 @@ public static class DiscordWebhook
         }
     }
 
-    public static async Task SendDiscordMessageAsync()
+    /// <summary>
+    /// Builds a simple Markdown kill report and sends it.
+    /// </summary>
+    public static Task SendSimpleKillReportAsync(string killer, string victim, string[] assisters)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("**💀 V Rising Kill Report**");
+        sb.AppendLine();
+        sb.AppendLine($"Killer: 🗡️ {killer}");
+        sb.AppendLine($"Victim: ☠️ {victim}");
+        if (assisters != null && assisters.Length > 0)
+            sb.AppendLine($"**Assisters:** {string.Join(", ", assisters)}");
+
+        return SendDiscordMessageAsync(sb.ToString());
+    }
+
+    public static async Task SendDiscordMessageAsync(string msg)
     {
         if (string.IsNullOrWhiteSpace(_webhookUrl))
         {
-            Plugin.Logger.LogWarning("[Warning] Webhook URL not loaded. Call Load() before sending.");
+            Plugin.Logger.LogWarning("Webhook URL not loaded. Call Load() before sending.");
             return;
         }
 
-        var payload = "{\"content\":\"testMsg\"}";
+        var payload = JsonSerializer.Serialize(new { content = msg });
         using var content = new StringContent(payload, Encoding.UTF8, "application/json");
         try
         {
             var response = await _http.PostAsync(_webhookUrl, content);
             if (!response.IsSuccessStatusCode)
-            {
-                Plugin.Logger.LogWarning($"Discord returned {response.StatusCode} when sending test message.");
-            }
+                Plugin.Logger.LogWarning($"Discord returned {response.StatusCode} when sending message.");
         }
         catch (Exception ex)
         {
-            Plugin.Logger.LogError($"[Error] Failed to send test message: {ex.Message}");
+            Plugin.Logger.LogError($"Failed to send Discord message: {ex.Message}");
         }
     }
 

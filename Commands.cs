@@ -64,7 +64,7 @@ public class Commands
 	[Command("testhook", shortHand: "h", description: "Shows Killfeed info")]
 	public void TestDiscordHook(ChatCommandContext ctx)
 	{
-		_ = DiscordWebhook.SendDiscordMessageAsync();
+		_ = DiscordWebhook.SendDiscordMessageAsync("test hook");
 	}
 
 	[Command("killfeed", shortHand: "kf", description: "Shows Killfeed info")]

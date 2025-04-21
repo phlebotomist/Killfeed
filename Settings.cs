@@ -13,6 +13,8 @@ internal class Settings
 	internal static bool UseMaxLevel { get; private set; }
 
 	internal static bool UseMaxPerFightLevel { get; private set; }
+
+	internal static bool UseDiscordWebhook { get; private set; } = false;
 	internal static void Initialize(ConfigFile config)
 	{
 		AnnounceKills = config.Bind("General", "AnnounceKills", true, "Announce kills in chat").Value;
@@ -22,7 +24,7 @@ internal class Settings
 
 		IncludeLevel = config.Bind("General", "IncludeLevel", true, "Include player gear levels in announcements.").Value;
 		UseMaxLevel = config.Bind("General", "UseMaxLevel", false, "Use max gear level instead of current gear level.").Value;
-		UseMaxPerFightLevel = config.Bind("General", "UseMaxPerFightLevel", true, "announce the highest gear level that was used in the fight.").Value;
-
+		UseMaxPerFightLevel = config.Bind("General", "UseMaxPerFightLevel", true, "Announce the highest gear level that was used in the fight.").Value;
+		UseDiscordWebhook = config.Bind("General", "UseDiscordWebhook", false, "Announce kills and damage breakdowns in discord (requires setup with hook.txt)").Value;
 	}
 }

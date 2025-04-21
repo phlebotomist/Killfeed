@@ -280,11 +280,22 @@ public class DataStore
 
 		var assistsString = GetFormatedAssistString(filteredHelpers);
 
-		ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, Markup.Prefix + message + assistsString);
+		var fullKillMessage = Markup.Prefix + message + assistsString;
+		ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, fullKillMessage);
+		if (Settings.UseDiscordWebhook)
+		{
+			_ = DiscordWebhook.SendSimpleKillReportAsync(killerUser.LastName, victimUser.LastName, filteredHelpers.Keys.ToArray());
+		}
 
 		if (!string.IsNullOrEmpty(killMsg) && Settings.AnnounceKillstreak)
 		{
-			ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, Markup.Prefix + killMsg);
+			var fullKillSteakMsg = Markup.Prefix + killMsg;
+			ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, fullKillSteakMsg);
+			if (Settings.UseDiscordWebhook)
+			{
+				// TODO: we need a new formatter for the webhook version of this that uses md not unity's markup
+				// _ = DiscordWebhook.SendDiscordMessageAsync(fullKillSteakMsg);
+			}
 		}
 	}
 
