@@ -7,6 +7,8 @@ namespace Killfeed;
 
 public struct HitInteraction
 {
+    public ulong AttackerSteamId;
+    public ulong VictimSteamId;
     public string AttackerName;
     public int AttackerLevel;
     public string VictimName;
@@ -25,95 +27,87 @@ public class PlayerHitData
 public static class PlayerHitStore
 {
     private const double PVP_WINDOW = 30.0; // seconds
-    // Dictionary keyed by player name (case-insensitive) holding each player's hit data.
-    private static readonly Dictionary<string, PlayerHitData> interactionsByPlayer =
-        new Dictionary<string, PlayerHitData>(StringComparer.OrdinalIgnoreCase);
 
-    public static IReadOnlyDictionary<string, PlayerHitData> InteractionsByPlayer => interactionsByPlayer;
+    private static readonly Dictionary<ulong, PlayerHitData> interactionsByPlayer =
+        new Dictionary<ulong, PlayerHitData>();
+
+    public static IReadOnlyDictionary<ulong, PlayerHitData> InteractionsByPlayer => interactionsByPlayer;
 
     public static void AddHit(
+        ulong attackerSteamId,
         string attackerName,
         int attackerLevel,
+        ulong victimSteamId,
         string victimName,
         int victimLevel,
         int dmgSourceGUID)
     {
         var hit = new HitInteraction
         {
+            AttackerSteamId = attackerSteamId,
             AttackerName = attackerName,
             AttackerLevel = attackerLevel,
+            VictimSteamId = victimSteamId,
             VictimName = victimName,
             VictimLevel = victimLevel,
             Timestamp = Stopwatch.GetTimestamp(),
             DmgSourceGUID = dmgSourceGUID
         };
 
-        // Currently no use for attack list so we don't add to it.
-        // AddAttack(attackerName, hit);
+        AddAttack(attackerSteamId, hit);
+        AddDefense(victimSteamId, hit);
 
-        AddDefense(victimName, hit);
-
-        // it might be over kill to check this but in the case someone is really good and never dies and fights a lot we should have way to clean up their data every once and a while.
-        // Server restart should do this as well but better to be safe than sorry.
-        if (InteractionsByPlayer.TryGetValue(victimName, out var victimHitData) && victimHitData.Defenses.Count >= 500)
+        // cleanup if too many defenses
+        if (interactionsByPlayer.TryGetValue(victimSteamId, out var victimHitData)
+            && victimHitData.Defenses.Count >= 500)
         {
-            CleanupOldHitInteractionsByPlayer(victimName);
+            CleanupOldHitInteractionsByPlayer(victimSteamId);
         }
     }
 
-    private static void AddAttack(string playerName, HitInteraction hit)
+    private static void AddAttack(ulong playerSteamId, HitInteraction hit)
     {
-        if (string.IsNullOrWhiteSpace(playerName))
-            return;
-
-        if (!interactionsByPlayer.TryGetValue(playerName, out var hitData))
+        if (!interactionsByPlayer.TryGetValue(playerSteamId, out var hitData))
         {
             hitData = new PlayerHitData();
-            interactionsByPlayer[playerName] = hitData;
+            interactionsByPlayer[playerSteamId] = hitData;
         }
         hitData.Attacks.Add(hit);
     }
 
-    private static void AddDefense(string playerName, HitInteraction hit)
+    private static void AddDefense(ulong playerSteamId, HitInteraction hit)
     {
-        if (string.IsNullOrWhiteSpace(playerName))
-            return;
-
-        if (!interactionsByPlayer.TryGetValue(playerName, out var hitData))
+        if (!interactionsByPlayer.TryGetValue(playerSteamId, out var hitData))
         {
             hitData = new PlayerHitData();
-            interactionsByPlayer[playerName] = hitData;
+            interactionsByPlayer[playerSteamId] = hitData;
         }
         hitData.Defenses.Add(hit);
     }
 
-    // Retrieves the list of attacks (hits initiated by the player).
-    public static IReadOnlyList<HitInteraction> GetAttacks(string playerName)
+    public static IReadOnlyList<HitInteraction> GetAttacks(ulong playerSteamId)
     {
-        if (interactionsByPlayer.TryGetValue(playerName, out var hitData))
+        if (interactionsByPlayer.TryGetValue(playerSteamId, out var hitData))
             return hitData.Attacks;
-        return new List<HitInteraction>();
+        return [];
     }
 
-    // Retrieves the list of defenses (hits received by the player).
-    public static IReadOnlyList<HitInteraction> GetDefenses(string playerName)
+    public static IReadOnlyList<HitInteraction> GetDefenses(ulong playerSteamId)
     {
-        if (interactionsByPlayer.TryGetValue(playerName, out var hitData))
+        if (interactionsByPlayer.TryGetValue(playerSteamId, out var hitData))
             return hitData.Defenses;
-        return new List<HitInteraction>();
+        return [];
     }
 
-    /// <summary>
-    /// Returns a dictionary mapping attacker names to their highest level recorded among defense hits
-    /// for the given player within the specified pvp time window (in seconds).
-    /// </summary>
-    public static Dictionary<string, int> GetRecentAttackersHighestLevel(string playerName, double pvpWindowSeconds = PVP_WINDOW)
+    //returns a map of attacker names to their highest level in the last pvpWindowSeconds seconds 
+    public static Dictionary<string, int> GetRecentAttackersHighestLevel(
+        ulong playerSteamId,
+        double pvpWindowSeconds = PVP_WINDOW)
     {
-        var result = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-        if (!interactionsByPlayer.TryGetValue(playerName, out var hitData))
+        var result = new Dictionary<string, int>();
+        if (!interactionsByPlayer.TryGetValue(playerSteamId, out var hitData))
             return result;
 
-        // Get current tick count and calculate the pvp window in ticks.
         long currentTicks = Stopwatch.GetTimestamp();
         long windowTicks = (long)(pvpWindowSeconds * Stopwatch.Frequency);
 
@@ -121,7 +115,6 @@ public static class PlayerHitStore
         {
             if (currentTicks - hit.Timestamp <= windowTicks)
             {
-                // If the attacker already exists in the result, update if this hit's level is higher. TODO: this needs to check settings to make sure we want maxlvlperfight
                 if (result.TryGetValue(hit.AttackerName, out int existingLevel))
                 {
                     if (hit.AttackerLevel > existingLevel)
@@ -136,36 +129,32 @@ public static class PlayerHitStore
         return result;
     }
 
-
-    public static void CleanupOldHitInteractionsByPlayer(string playerName, double pvpWindowSeconds = PVP_WINDOW)
+    public static void CleanupOldHitInteractionsByPlayer(
+        ulong playerSteamId,
+        double pvpWindowSeconds = PVP_WINDOW)
     {
-
-        if (!interactionsByPlayer.TryGetValue(playerName, out var hitData))
+        if (!interactionsByPlayer.TryGetValue(playerSteamId, out var hitData))
             return;
 
-        Plugin.Logger.LogMessage($"CLEANING up hit interactions for player: {playerName}");
+        Plugin.Logger.LogMessage($"CLEANING up hit interactions for SteamID: {playerSteamId}");
 
         long currentTicks = Stopwatch.GetTimestamp();
         long windowTicks = (long)(pvpWindowSeconds * Stopwatch.Frequency);
 
-        // Remove any hit interactions from the Desfenses list that are outside the current PvP window.
-        var sizeBefore = hitData.Defenses.Count;
+        int before = hitData.Defenses.Count;
         hitData.Defenses.RemoveAll(hit => (currentTicks - hit.Timestamp) > windowTicks);
-        var sizeAfter = hitData.Defenses.Count;
-        Plugin.Logger.LogMessage($"CLEANED up [{sizeAfter - sizeBefore}] old hit interactions for player: {playerName}");
+        int after = hitData.Defenses.Count;
+        Plugin.Logger.LogMessage($"CLEANED up {before - after} old hit interactions for SteamID: {playerSteamId}");
     }
-    public static void ResetPlayerHitInteractions(string playerName)
+
+    public static void ResetPlayerHitInteractions(ulong playerSteamId)
     {
-        if (interactionsByPlayer.TryGetValue(playerName, out var hitData))
+        if (interactionsByPlayer.TryGetValue(playerSteamId, out var hitData))
         {
-            Plugin.Logger.LogMessage($"RESETTING {playerName}'s hit interactions.");
             hitData.Attacks.Clear();
             hitData.Defenses.Clear();
         }
-        else
-        {
-            Plugin.Logger.LogMessage($"No hit interactions found for {playerName} to reset.");
-        }
     }
+
     public static void Clear() => interactionsByPlayer.Clear();
 }

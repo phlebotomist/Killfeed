@@ -2,6 +2,7 @@ using System;
 using Bloodstone.API;
 using HarmonyLib;
 using ProjectM;
+using ProjectM.Network;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
@@ -28,8 +29,9 @@ public static class VampireDownedHook
 			Plugin.Logger.LogMessage("Couldn't get victim entity");
 			return;
 		}
-
-		PlayerHitStore.ResetPlayerHitInteractions(victimEntity.Read<PlayerCharacter>().Name.ToString());
+		var victimPlayer = victimEntity.Read<PlayerCharacter>();
+		var victimSteamId = victimPlayer.UserEntity.Read<User>().PlatformId;
+		PlayerHitStore.ResetPlayerHitInteractions(victimSteamId);
 	}
 	private static void ProcessVampireDowned(Entity entity)
 	{
@@ -50,6 +52,7 @@ public static class VampireDownedHook
 		}
 
 		var victim = victimEntity.Read<PlayerCharacter>();
+		var victimUser = victim.UserEntity.Read<User>();
 
 		Plugin.Logger.LogMessage($"{victim.Name} is victim");
 		var unitKiller = killerEntity.Has<UnitLevel>();
@@ -63,7 +66,7 @@ public static class VampireDownedHook
 			}
 
 			var victimName = victim.Name.ToString();
-			var assisters = PlayerHitStore.GetRecentAttackersHighestLevel(victimName);
+			var assisters = PlayerHitStore.GetRecentAttackersHighestLevel(victimUser.PlatformId);
 			if (assisters.Count == 0)
 			{
 				Plugin.Logger.LogInfo($"{victim.Name} was killed by a unit, no other vampires involved");
@@ -101,8 +104,9 @@ public static class VampireDownedHook
 
 		if (Settings.UseMaxPerFightLevel)
 		{
-			var attackers = PlayerHitStore.GetRecentAttackersHighestLevel(victim.Name.ToString());
-			// find the killer in the attackers list and set the lvl to that level
+			// var attackerUser = killer.UserEntity.Read<User>();
+			var attackers = PlayerHitStore.GetRecentAttackersHighestLevel(victimUser.PlatformId);
+			// TODO: we prob want to be using a steamID to key this map incase names are changed while fights are happening
 			if (attackers.TryGetValue(killer.Name.ToString(), out var maxLevel))
 			{
 				killerCurrentLevel = maxLevel;

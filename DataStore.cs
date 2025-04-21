@@ -270,7 +270,7 @@ public class DataStore
 			_ => null
 		};
 
-		var helpersDict = PlayerHitStore.GetRecentAttackersHighestLevel(victimUser.LastName);
+		var helpersDict = PlayerHitStore.GetRecentAttackersHighestLevel(victimUser.SteamId);
 
 		// Filter out the killer and format each entry to include the level.
 		var filteredHelpers = helpersDict

@@ -70,6 +70,10 @@ public static class DealDamageHook
                 continue;
 
             var victimPlayer = em.GetComponentData<PlayerCharacter>(victimEntity);
+
+            var attackerPlatformId = sourcePlayer.Value.UserEntity.Read<User>().PlatformId;
+            var victimPlatformId = victimPlayer.UserEntity.Read<User>().PlatformId;
+
             var attackerName = sourcePlayer.Value.Name.ToString();
             var victimName = victimPlayer.Name.ToString();
 
@@ -83,7 +87,7 @@ public static class DealDamageHook
             // get the spell or weapon GUID hash:
             int sourceDmgGuidHash = GetAbilityGUIDHash(em, damageEvent.SpellSource);
 
-            PlayerHitStore.AddHit(attackerName, attackerLvl, victimName, victimLvl, sourceDmgGuidHash);
+            PlayerHitStore.AddHit(attackerPlatformId, attackerName, attackerLvl, victimPlatformId, victimName, victimLvl, sourceDmgGuidHash);
         }
 
         entities.Dispose();
