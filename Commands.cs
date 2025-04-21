@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Cpp2IL.Core.Extensions;
 using ProjectM;
 using ProjectM.Network;
@@ -51,6 +52,19 @@ public class Commands
 		}
 		ctx.Reply(sb.ToString());
 		ctx.Reply(sb2.ToString());
+	}
+
+	[Command("reloadHook", shortHand: "rl", description: "Shows Killfeed info")]
+	public async void ReloadDiscordHook(ChatCommandContext ctx)
+	{
+		bool issetup = await DiscordWebhook.LoadHook();
+		ctx.Reply(issetup ? "Discord Webhook loaded!" : "Something went wrong loading the Discord Webhook. Check the logs or reset the file.");
+	}
+
+	[Command("testhook", shortHand: "h", description: "Shows Killfeed info")]
+	public void TestDiscordHook(ChatCommandContext ctx)
+	{
+		_ = DiscordWebhook.SendDiscordMessageAsync();
 	}
 
 	[Command("killfeed", shortHand: "kf", description: "Shows Killfeed info")]

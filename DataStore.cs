@@ -189,7 +189,7 @@ public class DataStore
 		var victimUser = victim.UserEntity.Read<User>();
 		var killerUser = killer.UserEntity.Read<User>();
 
-		Plugin.Logger.LogWarning($"{victimLevel} {killerLevel}");
+		// Plugin.Logger.LogWarning($"{victimLevel} {killerLevel}");
 
 		var newEvent = new EventData(victimUser.PlatformId, killerUser.PlatformId, location, DateTime.UtcNow.Ticks, victimLevel, killerLevel);
 

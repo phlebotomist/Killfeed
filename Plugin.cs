@@ -31,6 +31,7 @@ public partial class Plugin : BasePlugin
 		Settings.Initialize(Config);
 
 		DataStore.LoadFromDisk();
+		_ = DiscordWebhook.LoadHook();
 	}
 
 	public override bool Unload()
