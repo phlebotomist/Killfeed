@@ -284,7 +284,14 @@ public class DataStore
 		ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, fullKillMessage);
 		if (Settings.UseDiscordWebhook)
 		{
-			_ = DiscordWebhook.SendSimpleKillReportAsync(killerUser.LastName, victimUser.LastName, filteredHelpers.Keys.ToArray());
+			if (1 == 1) // TODO: this should be a check for settings that I haven't added yet for if the users want to see the breakdown of the kill
+			{
+				_ = DiscordWebhook.SendDetailedBreakdownAsync(victimUser.SteamId, victimUser.LastName, killerUser.LastName, filteredHelpers.Keys.ToArray());
+			}
+			else
+			{
+				_ = DiscordWebhook.SendSimpleKillReportAsync(killerUser.LastName, victimUser.LastName, filteredHelpers.Keys.ToArray());
+			}
 		}
 
 		if (!string.IsNullOrEmpty(killMsg) && Settings.AnnounceKillstreak)

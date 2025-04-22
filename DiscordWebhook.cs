@@ -71,6 +71,49 @@ public static class DiscordWebhook
         return SendDiscordMessageAsync(sb.ToString());
     }
 
+    public static Task SendDetailedBreakdownAsync(
+        ulong victimSteamId,
+        string victimName,
+        string killerName,
+        string[] assisters,
+        double pvpWindowSeconds = 30.0)
+    {
+        // Header line: who killed and who assisted
+        var headerSb = new StringBuilder();
+        headerSb.Append($"**⚔️ {killerName} killed {victimName}**");
+        if (assisters != null && assisters.Length > 0)
+        {
+            headerSb.Append($" (assisted by {string.Join(", ", assisters)})");
+        }
+        headerSb.AppendLine();
+
+        // Fetch recent hits
+        var hits = PlayerHitStore.GetRecentInteractions(victimSteamId, pvpWindowSeconds);
+        if (hits.Count == 0)
+        {
+            headerSb.AppendLine($"No interactions to show for **{victimName}** in the last {pvpWindowSeconds:F0}s.");
+            return SendDiscordMessageAsync(headerSb.ToString());
+        }
+
+        // Build breakdown lines
+        var sb = new StringBuilder();
+        sb.AppendLine(headerSb.ToString());
+        sb.AppendLine(); // blank line
+
+        foreach (var hit in hits)
+        {
+            var ability = HitNameResolver.Resolve(hit.DmgSourceGUID);
+            sb.AppendLine(
+                $"{hit.AttackerName} ({hit.AttackerLevel}) " +
+                $"hit **{victimName}** ({hit.VictimLevel}) " +
+                $"with **{ability}**"
+            );
+        }
+
+        return SendDiscordMessageAsync(sb.ToString());
+    }
+
+
     public static async Task SendDiscordMessageAsync(string msg)
     {
         if (string.IsNullOrWhiteSpace(_webhookUrl))

@@ -128,6 +128,28 @@ public static class PlayerHitStore
         }
         return result;
     }
+    /// <summary>
+    /// Returns all hit interactions (both attacks and defenses) for the given player
+    /// that occurred within the 'pvpWindowSeconds' seconds,
+    /// sorted by timestamp (oldest first).
+    /// </summary>
+    public static IReadOnlyList<HitInteraction> GetRecentInteractions(
+        ulong playerSteamId,
+        double pvpWindowSeconds = PVP_WINDOW)
+    {
+        if (!interactionsByPlayer.TryGetValue(playerSteamId, out var hitData))
+            return [];
+
+        long nowTicks = Stopwatch.GetTimestamp();
+        long windowTicks = (long)(pvpWindowSeconds * Stopwatch.Frequency);
+        long earliest = nowTicks - windowTicks;
+
+        return hitData.Attacks
+            .Concat(hitData.Defenses)
+            .Where(hit => hit.Timestamp >= earliest)
+            .OrderBy(hit => hit.Timestamp)
+            .ToList();
+    }
 
     public static void CleanupOldHitInteractionsByPlayer(
         ulong playerSteamId,
