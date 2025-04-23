@@ -13,6 +13,7 @@ using Unity.Mathematics;
 using UnityEngine.Jobs;
 using Random = System.Random;
 using Microsoft.VisualBasic;
+using Unity.Entities.UniversalDelegates;
 
 namespace Killfeed;
 public class DataStore
@@ -279,8 +280,12 @@ public class DataStore
 
 
 		var assistsString = GetFormatedAssistString(filteredHelpers);
+		if (filteredHelpers.Count > 0)
+		{
+			message += $" with help from: {assistsString}";
+		}
 
-		var fullKillMessage = Markup.Prefix + message + assistsString;
+		var fullKillMessage = Markup.Prefix + message;
 		ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, fullKillMessage);
 		if (Settings.UseDiscordWebhook)
 		{
