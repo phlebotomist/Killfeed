@@ -105,7 +105,7 @@ public static class DiscordWebhook
             var ability = HitNameResolver.Resolve(hit.DmgSourceGUID);
             sb.AppendLine(
                 $"{hit.AttackerName} ({hit.AttackerLevel}) " +
-                $"hit **{victimName}** ({hit.VictimLevel}) " +
+                $"hit **{hit.VictimName}** ({hit.VictimLevel}) " +
                 $"with **{ability}**"
             );
         }

@@ -15,6 +15,7 @@ public struct HitInteraction
     public int VictimLevel;
     public long Timestamp;
     public int DmgSourceGUID;
+    public int DmgAmount;
 }
 
 public class PlayerHitData
@@ -40,7 +41,8 @@ public static class PlayerHitStore
         ulong victimSteamId,
         string victimName,
         int victimLevel,
-        int dmgSourceGUID)
+        int dmgSourceGUID,
+        int damageAmount)
     {
         var hit = new HitInteraction
         {
@@ -51,7 +53,8 @@ public static class PlayerHitStore
             VictimName = victimName,
             VictimLevel = victimLevel,
             Timestamp = Stopwatch.GetTimestamp(),
-            DmgSourceGUID = dmgSourceGUID
+            DmgSourceGUID = dmgSourceGUID,
+            DmgAmount = damageAmount
         };
 
         AddAttack(attackerSteamId, hit);
