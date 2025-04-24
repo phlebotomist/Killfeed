@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -114,6 +116,58 @@ public static class DiscordWebhook
         return SendDiscordMessageAsync(sb.ToString());
     }
 
+    public static Task SendFightSummaryAsync(
+    ulong victimSteamId,
+    string victimName,
+    double pvpWindowSeconds = 30.0)
+    {
+        // Pull recent interactions that involve the victim (as attacker or victim)
+        var hits = PlayerHitStore.GetRecentInteractions(victimSteamId, pvpWindowSeconds);
+        if (hits.Count == 0)
+            return SendDiscordMessageAsync(
+                $"**📊 No combat data for {victimName} in the last {pvpWindowSeconds:F0}s.**");
+
+        // Aggregate damage totals
+        var incoming = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+        var outgoing = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var hit in hits)
+        {
+            var ability = HitNameResolver.Resolve(hit.DmgSourceGUID);
+
+            //We prob need to deal with sun and silve here as well TODO
+            if (string.Equals(hit.VictimName, victimName, StringComparison.OrdinalIgnoreCase))
+            {
+                incoming[ability] = incoming.TryGetValue(ability, out var v) ? v + hit.DmgAmount : hit.DmgAmount;
+            }
+            else if (string.Equals(hit.AttackerName, victimName, StringComparison.OrdinalIgnoreCase))
+            {
+                outgoing[ability] = outgoing.TryGetValue(ability, out var v) ? v + hit.DmgAmount : hit.DmgAmount;
+            }
+        }
+
+        // Build the Discord message
+        var sb = new StringBuilder();
+        sb.AppendLine($"**📊 Damage summary for {victimName} (last {pvpWindowSeconds:F0}s)**");
+        sb.AppendLine();
+
+        if (incoming.Count > 0)
+        {
+            sb.AppendLine($"__**Incoming damage**__");
+            foreach (var kvp in incoming.OrderByDescending(k => k.Value))
+                sb.AppendLine($"• {kvp.Key}: **{kvp.Value:F0}**");
+        }
+
+        if (outgoing.Count > 0)
+        {
+            sb.AppendLine(); // blank line between the two sections
+            sb.AppendLine($"__**Outgoing damage**__");
+            foreach (var kvp in outgoing.OrderByDescending(k => k.Value))
+                sb.AppendLine($"• {kvp.Key}: **{kvp.Value:F0}**");
+        }
+
+        return SendDiscordMessageAsync(sb.ToString());
+    }
 
     public static async Task SendDiscordMessageAsync(string msg)
     {

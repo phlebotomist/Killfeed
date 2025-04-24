@@ -291,7 +291,10 @@ public class DataStore
 		{
 			if (1 == 1) // TODO: this should be a check for settings that I haven't added yet for if the users want to see the breakdown of the kill
 			{
-				_ = DiscordWebhook.SendDetailedBreakdownAsync(victimUser.SteamId, victimUser.LastName, killerUser.LastName, filteredHelpers.Keys.ToArray());
+
+				// TODO: we need another settings for choosing which type of message to send to discord, line by line or damage summary
+				// _ = DiscordWebhook.SendDetailedBreakdownAsync(victimUser.SteamId, victimUser.LastName, killerUser.LastName, filteredHelpers.Keys.ToArray());
+				_ = DiscordWebhook.SendFightSummaryAsync(victimUser.SteamId, victimUser.LastName);
 			}
 			else
 			{
