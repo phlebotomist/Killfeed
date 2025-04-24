@@ -20,7 +20,6 @@ public static class TrackVampireAttacksPatch
 
     private static int GetAbilityGUIDHash(EntityManager em, Entity dmgSource)
     {
-        // direct PrefabGUID on the source entity
         if (dmgSource != Entity.Null && em.HasComponent<PrefabGUID>(dmgSource))
         {
             return em.GetComponentData<PrefabGUID>(dmgSource).GuidHash;
@@ -29,18 +28,15 @@ public static class TrackVampireAttacksPatch
     }
     public static bool Prefix(StatChangeSystem __instance, ref StatChangeEvent statChange, EntityCommandBuffer commandBuffer)
     {
-        // p(__instance.EntityManager, $"[1]:");
-        // Ensure player->player damage
+        // Ensure pvp or sun damage ( THIS DOES NOT DAEL WITH SILVER YET TODO)
         if (statChange.Reason != StatChangeReason.DealDamageSystem_0 && statChange.Reason != StatChangeReason.TakeDamageInSunSystem_0)
             return true;
 
-        // p(__instance.EntityManager, $"[2]:");
 
-        // Ensure damage, not healing
+        // ignore healing for now (TODO, Maybe? feature creep aaahh)
         if (statChange.Change > 0)
             return true;
 
-        // p(__instance.EntityManager, $"[3]:");
         EntityManager em = __instance.EntityManager;
 
         if (!em.HasComponent<EntityOwner>(statChange.Source))
@@ -54,17 +50,10 @@ public static class TrackVampireAttacksPatch
         PlayerCharacter defenderCharacter = em.GetComponentData<PlayerCharacter>(statChange.Entity);
         Entity attackerEntity = em.GetComponentData<EntityOwner>(statChange.Source).Owner;
 
-        // p(entityManager, $"[4]:");
-
         if (!em.Exists(attackerEntity) || !em.HasComponent<PlayerCharacter>(attackerEntity))
             return true;
 
-        // p(entityManager, $"[5]:");
-
         PlayerCharacter attackerCharacter = em.GetComponentData<PlayerCharacter>(attackerEntity);
-
-
-        // p(em, $"damage done: {damageAmount}, reason: {statChange.Reason}");
 
         ulong attackerPlatformId = attackerCharacter.UserEntity.Read<User>().PlatformId;
         ulong victimPlatformId = defenderCharacter.UserEntity.Read<User>().PlatformId;

@@ -106,7 +106,8 @@ public static class DiscordWebhook
             sb.AppendLine(
                 $"{hit.AttackerName} ({hit.AttackerLevel}) " +
                 $"hit **{hit.VictimName}** ({hit.VictimLevel}) " +
-                $"with **{ability}**"
+                $"with **{ability}**" +
+                $" for **{hit.DmgAmount}** damage"
             );
         }
 
