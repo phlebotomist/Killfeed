@@ -123,7 +123,9 @@ public static class DiscordWebhook
             return;
         }
 
-        var payload = JsonSerializer.Serialize(new { content = msg });
+        var now = DateTime.UtcNow.ToString("yyyy-MM-dd_HH:mm:ss");
+        var payload = JsonSerializer.Serialize(new { username = $"test-name-{now}", content = msg });
+
         using var content = new StringContent(payload, Encoding.UTF8, "application/json");
         try
         {
