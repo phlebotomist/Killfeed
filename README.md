@@ -1,6 +1,6 @@
 ![](logo.png)
 
-# PvPBreakdown - PvP Leaderboard, Killfeed, and post fight breakdowns
+# PvPBreakdown- Leaderboard, Killfeed, and post fight breakdowns
 
 ## Features
 
@@ -72,15 +72,13 @@ UseMaxPerFightLevel = true
 
 # credits and thanks:
 
-    This mod is based on Deca's https://thunderstore.io/c/v-rising/p/deca/Killfeed/
-    Want to give thanks to Deca for all his work making kf, bloodstone, and vfc. Additionally everyone in the VrisingModing discord who has helped with my endless questions.
+This mod is based on Deca's [Killfeed](https://thunderstore.io/c/v-rising/p/deca/Killfeed/)
+Want to give thanks to Deca for all his work making kf, bloodstone, and vfc. Additionally everyone in the VrisingModing discord who helped answer questions.
 
 # Support:
 
-- I go by `Morphine` on the Vrising modding discord
+- I go by `Morphine` on the Vrising modding [Modding VRising Mod ](]https://vrisingmods.com/discord)
 - Additionally feel free to open issues on the github
-
-## https://vrisingmods.com/discord
 
 # Pull Requests:
 
