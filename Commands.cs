@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -88,6 +89,21 @@ public class Commands
 	public void TestDiscordHook(ChatCommandContext ctx)
 	{
 		_ = DiscordWebhook.SendDiscordMessageAsync("test hook");
+	}
+
+	[Command("change combat breakdown detail level", shortHand: "combatdetail", description: "Shows Killfeed info")]
+	public void ChangeCombatBreakdownDetailLevel(ChatCommandContext ctx, string v)
+	{
+		try
+		{
+			Settings.CombatBreakdownDetail = int.Parse(v);
+			ctx.Reply($"combat breakdown detail level has been set to: {v}");
+		}
+		catch (Exception)
+		{
+			ctx.Reply($"failed to parse value: {v}, using keeping current value at: {Settings.CombatBreakdownDetail}");
+			ctx.Reply($"Make sure to use a number between 0 and 3.");
+		}
 	}
 
 	[Command("killfeed", shortHand: "kf", description: "Shows Killfeed info")]

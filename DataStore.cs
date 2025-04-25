@@ -330,15 +330,19 @@ public class DataStore
 		var fullKillMessage = Markup.Prefix + message;
 		ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, fullKillMessage);
 
-		if (1 == 1) // TODO: this should be a check for settings that I haven't added yet for if the users want to see the breakdown of the kill
+		switch (Settings.CombatBreakdownDetail)
 		{
-			// TODO: we need another settings for choosing which type of message to send to discord, line by line or damage summary
-			DiscordWebhook.SendDetailedBreakdownAsync(victimUser.SteamId, victimUser.LastName, killerUser.LastName, filteredHelpers.Keys.ToArray());
-			DiscordWebhook.SendFightSummaryAsync(victimUser.SteamId, victimUser.LastName);
-		}
-		else
-		{
-			DiscordWebhook.SendSimpleKillReportAsync(killerUser.LastName, victimUser.LastName, filteredHelpers.Keys.ToArray());
+			case 1:
+				DiscordWebhook.SendSimpleKillReportAsync(killerUser, victimUser, filteredHelpers.Keys.ToArray());
+				break;
+			case 2:
+				DiscordWebhook.SendFightSummaryAsync(victimUser, killerUser);
+				break;
+			case 3:
+				DiscordWebhook.SendDetailedBreakdownAsync(victimUser.SteamId, victimUser.LastName, killerUser.LastName, filteredHelpers.Keys.ToArray());
+				break;
+			default:
+				break;
 		}
 
 		if (!string.IsNullOrEmpty(killStreakMsg) && Settings.AnnounceKillstreak)

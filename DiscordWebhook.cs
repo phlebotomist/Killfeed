@@ -75,16 +75,14 @@ public static class DiscordWebhook
     /// <summary>
     /// Builds a simple Markdown kill report and sends it.
     /// </summary>
-    public static void SendSimpleKillReportAsync(string killer, string victim, string[] assisters)
+    public static void SendSimpleKillReportAsync(PlayerStatistics killer, PlayerStatistics victim, string[] assisters)
     {
         if (!HookEnabled())
             return;
 
         var sb = new StringBuilder();
-        sb.AppendLine("**💀 V Rising Kill Report**");
         sb.AppendLine();
-        sb.AppendLine($"Killer: 🗡️ {killer}");
-        sb.AppendLine($"Victim: ☠️ {victim}");
+        sb.AppendLine($"🗡️ **{killer.LastName}** ({killer.CurrentLevel}) killed **{victim.LastName}** ({victim.CurrentLevel}) ☠️");
         if (assisters != null && assisters.Length > 0)
             sb.AppendLine($"**Assisters:** {string.Join(", ", assisters)}");
 
@@ -135,14 +133,14 @@ public static class DiscordWebhook
     }
 
     public static void SendFightSummaryAsync(
-    ulong victimSteamId,
-    string victimName,
+    PlayerStatistics victim,
+    PlayerStatistics killer,
     double pvpWindowSeconds = 30.0)
     {
         if (!HookEnabled())
             return;
 
-        var hits = PlayerHitStore.GetRecentInteractions(victimSteamId, pvpWindowSeconds);
+        var hits = PlayerHitStore.GetRecentInteractions(victim.SteamId, pvpWindowSeconds);
         var incoming = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
         var outgoing = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
 
@@ -151,18 +149,21 @@ public static class DiscordWebhook
             var ability = HitNameResolver.Resolve(hit.DmgSourceGUID);
 
             //TODO: We prob need to deal with sun and silve here as well
-            if (string.Equals(hit.VictimName, victimName, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(hit.VictimName, victim.LastName, StringComparison.OrdinalIgnoreCase))
             {
                 incoming[ability] = incoming.TryGetValue(ability, out var v) ? v + hit.DmgAmount : hit.DmgAmount;
             }
-            else if (string.Equals(hit.AttackerName, victimName, StringComparison.OrdinalIgnoreCase))
+            else if (string.Equals(hit.AttackerName, victim.LastName, StringComparison.OrdinalIgnoreCase))
             {
                 outgoing[ability] = outgoing.TryGetValue(ability, out var v) ? v + hit.DmgAmount : hit.DmgAmount;
             }
         }
 
         var sb = new StringBuilder();
-        sb.AppendLine($"**📊 Damage summary for {victimName} (last {pvpWindowSeconds:F0}s)**");
+
+        sb.Append($"**⚔️{killer.LastName} killed {victim.LastName}**");
+
+        sb.AppendLine($"**📊 Damage summary for {victim.LastName} (last {pvpWindowSeconds:F0}s)**");
         sb.AppendLine();
 
         if (incoming.Count > 0)
@@ -189,7 +190,7 @@ public static class DiscordWebhook
             return;
 
         var now = DateTime.UtcNow.ToString("yyyy-MM-dd_HH:mm:ss");
-        var payload = JsonSerializer.Serialize(new { username = $"test-name-{now}", content = msg });
+        var payload = JsonSerializer.Serialize(new { username = $"💀 Kill Reporter 💀 [{now}]", content = msg });
 
         using var content = new StringContent(payload, Encoding.UTF8, "application/json");
         try
