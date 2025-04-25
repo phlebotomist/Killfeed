@@ -13,7 +13,7 @@ internal class Settings
 	internal static bool IncludeLevel { get; private set; }
 	// internal static bool UseMaxLevel { get; private set; } depricated
 
-	internal static bool UseMaxPerFightLevel { get; private set; }
+	// internal static bool UseMaxPerFightLevel { get; private set; } this will be added back in the future maybe but I don't see any reason to not have it be true
 
 	internal static bool UseDiscordWebhook { get; private set; } = false;
 
@@ -27,7 +27,7 @@ internal class Settings
 
 		IncludeLevel = config.Bind("General", "IncludeLevel", true, "Include player gear levels in announcements.").Value;
 		// UseMaxLevel = config.Bind("General", "UseMaxLevel", false, "Use max gear level instead of current gear level.").Value;
-		UseMaxPerFightLevel = config.Bind("General", "UseMaxPerFightLevel", true, "Announce the highest gear level that was used in the fight.").Value;
+		// UseMaxPerFightLevel = config.Bind("General", "UseMaxPerFightLevel", true, "Announce the highest gear level that was used in the fight.").Value;
 		UseDiscordWebhook = config.Bind("General", "UseDiscordWebhook", false, "Announce kills and damage breakdowns in discord (requires setup with hook.txt)").Value;
 		CombatBreakdownDetail = config.Bind("General", "CombatBreakdownDetail", 1, "the level of detail you want to show in the combat report sent to discord. Examples of each type are shown on README").Value;
 	}

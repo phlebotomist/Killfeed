@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Bloodstone.API;
 using HarmonyLib;
 using ProjectM;
@@ -55,16 +56,19 @@ public static class VampireDownedHook
 		PlayerCharacter victim = victimEntity.Read<PlayerCharacter>();
 		User victimUser = victim.UserEntity.Read<User>();
 
-		if (Settings.AnounceUnitKillSteals && killerEntity.Has<UnitLevel>())
+		if (!killerEntity.Has<UnitLevel>() && !killerEntity.Has<PlayerCharacter>())
 		{
-			// TODO: 
-			// DataStore.HandleUnitKillSteal(victimName, victimLvl, assisters);
+			Plugin.Logger.LogWarning($"Killer could not be identified for {victim.Name}, if you know how to reproduce this please contact Morphine on discord or report on github");
 			return;
 		}
 
-		if (!killerEntity.Has<PlayerCharacter>())
+		if (killerEntity.Has<UnitLevel>())
 		{
-			Plugin.Logger.LogWarning($"Killer could not be identified for {victim.Name}, if you know how to reproduce this please contact Morphine on discord or report on github");
+			if (Settings.AnounceUnitKillSteals)
+			{
+				// DataStore.HandleUnitKillSteal(victimEntity);
+				return;
+			}
 			return;
 		}
 
@@ -82,15 +86,11 @@ public static class VampireDownedHook
 		int victimCurrentLevel = victimEntity.Has<Equipment>(out var victimEquipment) ? (int)Math.Round(victimEquipment.GetFullLevel()) : -1;
 		int killerCurrentLevel = killerEntity.Has<Equipment>(out var killerEquipment) ? (int)Math.Round(killerEquipment.GetFullLevel()) : -1;
 
-		ulong[] assistIds = [];
-		if (Settings.UseMaxPerFightLevel)
+		Dictionary<ulong, (string, int)> attackers = PlayerHitStore.GetRecentAttackersWithLvl(victimUser.PlatformId);
+		ulong[] assistIds = attackers.Keys.ToArray();
+		if (attackers.TryGetValue(killerUser.PlatformId, out (string, int) name_lvl))
 		{
-			Dictionary<ulong, (string, int)> attackers = PlayerHitStore.GetRecentAttackersWithLvl(victimUser.PlatformId);
-			assistIds = [.. attackers.Keys];
-			if (attackers.TryGetValue(killerUser.PlatformId, out (string, int) name_lvl))
-			{
-				killerCurrentLevel = name_lvl.Item2;
-			}
+			killerCurrentLevel = name_lvl.Item2;
 		}
 
 
