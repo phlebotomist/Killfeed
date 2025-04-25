@@ -39,7 +39,7 @@ public class Commands
 		var sb2 = new StringBuilder();
 
 		sb2.AppendLine("");
-		sb.AppendLine($"{Markup.Prefix} <size=18><u>Top Kills (K/D/A)</u></size>");
+		sb.AppendLine($"{Markup.Prefix} <size=18><u>Leaderboard (K/D/A)</u></size>");
 
 		const int COL_WIDTH = 5;
 		const string COLOR = Markup.SecondaryColor;
@@ -73,7 +73,6 @@ public class Commands
 			sb2.AppendLine($"{i + 1}. {GetLine(k)}");
 		}
 
-		//TODO this prints 2 system messages, we should prob just print some header difference to show the difference between the two messages and keep it in one message 
 		ctx.Reply(sb.ToString());
 		ctx.Reply(sb2.ToString());
 	}

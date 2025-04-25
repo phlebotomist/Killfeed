@@ -241,16 +241,13 @@ public class DataStore
 
 		RecordKill(killerUser.PlatformId);
 		var lostStreak = RecordDeath(victimUser.PlatformId);
-		// Record Assists:
-		if (1 == 1) //TODO: this should be the setting for if we recordAssists
-		{
-			foreach (var platformId in assistIds)
-			{
-				if (platformId == killerUser.PlatformId) continue; // skip the killer
-				if (platformId == victimUser.PlatformId) continue; // skip the victim
-				RecordAssist(platformId);
-			}
 
+		// Record each Assists:
+		foreach (var platformId in assistIds)
+		{
+			if (platformId == killerUser.PlatformId) continue; // skip the killer
+			if (platformId == victimUser.PlatformId) continue; // skip the victim
+			RecordAssist(platformId);
 		}
 
 		AnnounceKill(victimData, killerData, lostStreak);

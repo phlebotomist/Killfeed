@@ -29,7 +29,7 @@
 
 ## Known Issues
 
-- Player's using unstuck during fight will not be tracked in any way by the mod
+- Player's dying to sun, silver, or unstuck do not go towards kills or kill steals at the moment.
 
 ## Setttings
 

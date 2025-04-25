@@ -28,12 +28,11 @@ public static class TrackVampireAttacksPatch
     }
     public static bool Prefix(StatChangeSystem __instance, ref StatChangeEvent statChange, EntityCommandBuffer commandBuffer)
     {
-        // Ensure pvp or sun damage ( THIS DOES NOT DAEL WITH SILVER YET TODO)
-        if (statChange.Reason != StatChangeReason.DealDamageSystem_0 && statChange.Reason != StatChangeReason.TakeDamageInSunSystem_0)
+        // TODO: deal with sun damage and silver damage 
+        // && statChange.Reason != StatChangeReason.TakeDamageInSunSystem_0
+        if (statChange.Reason != StatChangeReason.DealDamageSystem_0)
             return true;
 
-
-        // ignore healing for now (TODO, Maybe? feature creep aaahh)
         if (statChange.Change > 0)
             return true;
 
@@ -64,8 +63,6 @@ public static class TrackVampireAttacksPatch
 
         int sourceDmgGuidHash = GetAbilityGUIDHash(em, statChange.Source);
         int damageAmount = (int)Math.Abs(Math.Round(statChange.Change));
-        // p(em, $"damage done: {damageAmount}, reason: {statChange.Reason}");
-
 
         PlayerHitStore.AddHit(attackerPlatformId, attackerName, attackerLvl, victimPlatformId, victimName, defenderLvl, sourceDmgGuidHash, damageAmount);
         return true;
