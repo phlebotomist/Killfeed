@@ -302,7 +302,7 @@ public class DataStore
 			? $"{killerName} ended {victimName}'s {Markup.Secondary(lostStreakAmount)} kill streak!"
 			: $"{killerName} killed {victimName}!";
 
-		var killMsg = killerUser.CurrentStreak switch
+		var killStreakMsg = killerUser.CurrentStreak switch
 		{
 			5 => $"<size=18>{killerName} is on a killing spree!",
 			10 => $"<size=19>{killerName} is on a rampage!",
@@ -329,29 +329,25 @@ public class DataStore
 
 		var fullKillMessage = Markup.Prefix + message;
 		ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, fullKillMessage);
-		if (Settings.UseDiscordWebhook)
-		{
-			if (1 == 1) // TODO: this should be a check for settings that I haven't added yet for if the users want to see the breakdown of the kill
-			{
 
-				// TODO: we need another settings for choosing which type of message to send to discord, line by line or damage summary
-				// _ = DiscordWebhook.SendDetailedBreakdownAsync(victimUser.SteamId, victimUser.LastName, killerUser.LastName, filteredHelpers.Keys.ToArray());
-				_ = DiscordWebhook.SendFightSummaryAsync(victimUser.SteamId, victimUser.LastName);
-			}
-			else
-			{
-				_ = DiscordWebhook.SendSimpleKillReportAsync(killerUser.LastName, victimUser.LastName, filteredHelpers.Keys.ToArray());
-			}
+		if (1 == 1) // TODO: this should be a check for settings that I haven't added yet for if the users want to see the breakdown of the kill
+		{
+			// TODO: we need another settings for choosing which type of message to send to discord, line by line or damage summary
+			DiscordWebhook.SendDetailedBreakdownAsync(victimUser.SteamId, victimUser.LastName, killerUser.LastName, filteredHelpers.Keys.ToArray());
+			DiscordWebhook.SendFightSummaryAsync(victimUser.SteamId, victimUser.LastName);
+		}
+		else
+		{
+			DiscordWebhook.SendSimpleKillReportAsync(killerUser.LastName, victimUser.LastName, filteredHelpers.Keys.ToArray());
 		}
 
-		if (!string.IsNullOrEmpty(killMsg) && Settings.AnnounceKillstreak)
+		if (!string.IsNullOrEmpty(killStreakMsg) && Settings.AnnounceKillstreak)
 		{
-			var fullKillSteakMsg = Markup.Prefix + killMsg;
+			var fullKillSteakMsg = Markup.Prefix + killStreakMsg;
 			ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, fullKillSteakMsg);
 			if (Settings.UseDiscordWebhook)
 			{
-				// TODO: we need a new formatter for the webhook version of this that uses md not unity's markup
-				// _ = DiscordWebhook.SendDiscordMessageAsync(fullKillSteakMsg);
+				DiscordWebhook.SendKillStreakOnDiscord(killerUser);
 			}
 		}
 	}

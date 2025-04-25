@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using static Killfeed.DataStore;
 
 namespace Killfeed;
 
@@ -57,11 +58,28 @@ public static class DiscordWebhook
         }
     }
 
+    // <summary>
+    // returns true if the hook is enabled in settings and valid.
+    // </summary>
+    public static bool HookEnabled()
+    {
+        return Settings.UseDiscordWebhook && !string.IsNullOrWhiteSpace(_webhookUrl);
+    }
+    public static void SendKillStreakOnDiscord(PlayerStatistics killerUser)
+    {
+        if (!HookEnabled())
+            return;
+        _ = SendDiscordMessageAsync("testest:" + killerUser.LastName);
+    }
+
     /// <summary>
     /// Builds a simple Markdown kill report and sends it.
     /// </summary>
-    public static Task SendSimpleKillReportAsync(string killer, string victim, string[] assisters)
+    public static void SendSimpleKillReportAsync(string killer, string victim, string[] assisters)
     {
+        if (!HookEnabled())
+            return;
+
         var sb = new StringBuilder();
         sb.AppendLine("**💀 V Rising Kill Report**");
         sb.AppendLine();
@@ -70,7 +88,7 @@ public static class DiscordWebhook
         if (assisters != null && assisters.Length > 0)
             sb.AppendLine($"**Assisters:** {string.Join(", ", assisters)}");
 
-        return SendDiscordMessageAsync(sb.ToString());
+        _ = SendDiscordMessageAsync(sb.ToString());
     }
 
     public static Task SendDetailedBreakdownAsync(
@@ -116,18 +134,15 @@ public static class DiscordWebhook
         return SendDiscordMessageAsync(sb.ToString());
     }
 
-    public static Task SendFightSummaryAsync(
+    public static void SendFightSummaryAsync(
     ulong victimSteamId,
     string victimName,
     double pvpWindowSeconds = 30.0)
     {
-        // Pull recent interactions that involve the victim (as attacker or victim)
-        var hits = PlayerHitStore.GetRecentInteractions(victimSteamId, pvpWindowSeconds);
-        if (hits.Count == 0)
-            return SendDiscordMessageAsync(
-                $"**📊 No combat data for {victimName} in the last {pvpWindowSeconds:F0}s.**");
+        if (!HookEnabled())
+            return;
 
-        // Aggregate damage totals
+        var hits = PlayerHitStore.GetRecentInteractions(victimSteamId, pvpWindowSeconds);
         var incoming = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
         var outgoing = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
 
@@ -135,7 +150,7 @@ public static class DiscordWebhook
         {
             var ability = HitNameResolver.Resolve(hit.DmgSourceGUID);
 
-            //We prob need to deal with sun and silve here as well TODO
+            //TODO: We prob need to deal with sun and silve here as well
             if (string.Equals(hit.VictimName, victimName, StringComparison.OrdinalIgnoreCase))
             {
                 incoming[ability] = incoming.TryGetValue(ability, out var v) ? v + hit.DmgAmount : hit.DmgAmount;
@@ -146,7 +161,6 @@ public static class DiscordWebhook
             }
         }
 
-        // Build the Discord message
         var sb = new StringBuilder();
         sb.AppendLine($"**📊 Damage summary for {victimName} (last {pvpWindowSeconds:F0}s)**");
         sb.AppendLine();
@@ -166,16 +180,13 @@ public static class DiscordWebhook
                 sb.AppendLine($"• {kvp.Key}: **{kvp.Value:F0}**");
         }
 
-        return SendDiscordMessageAsync(sb.ToString());
+        _ = SendDiscordMessageAsync(sb.ToString());
     }
 
     public static async Task SendDiscordMessageAsync(string msg)
     {
-        if (string.IsNullOrWhiteSpace(_webhookUrl))
-        {
-            Plugin.Logger.LogWarning("Webhook URL not loaded. Call Load() before sending.");
+        if (!HookEnabled())
             return;
-        }
 
         var now = DateTime.UtcNow.ToString("yyyy-MM-dd_HH:mm:ss");
         var payload = JsonSerializer.Serialize(new { username = $"test-name-{now}", content = msg });
