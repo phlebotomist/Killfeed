@@ -65,7 +65,7 @@ public static class VampireDownedHook
 
 		if (!killerEntity.Has<PlayerCharacter>())
 		{
-			Plugin.Logger.LogWarning($"Killer could not be identified for {victim.Name}, if you know how to reproduce this please contact deca on discord or report on github");
+			Plugin.Logger.LogWarning($"Killer could not be identified for {victim.Name}, if you know how to reproduce this please contact Morphine on discord or report on github");
 			return;
 		}
 

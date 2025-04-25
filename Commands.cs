@@ -10,7 +10,21 @@ namespace Killfeed;
 
 public class Commands
 {
-	[Command("killfeed leaderboard", shortHand: "kf top")]
+	public static string Pad(string s, int n)
+	{
+		return new string('*', n) + s + new string('*', n);
+	}
+
+	public static string PadR(string s, int n)
+	{
+		return s + new string('*', n);
+	}
+	public static string PadL(string s, int n)
+	{
+		return new string('*', n) + s;
+	}
+
+	[Command("leaderboard", shortHand: "kf top")]
 	public void TopCommand(ChatCommandContext ctx)
 	{
 		// TODO: Enhance with cache and such
@@ -21,38 +35,45 @@ public class Commands
 		offset = offset > topKillers.Length ? topKillers.Length : offset;
 		num = num > topKillers.Length ? topKillers.Length : num;
 
-
-
-		var pad = (string name) => new string('\t'.Repeat(6 - name.Length / 5).ToArray());
-
-
 		var sb = new StringBuilder();
 		var sb2 = new StringBuilder();
 
 		sb2.AppendLine("");
-		sb.AppendLine($"{Markup.Prefix} <size=18><u>Top Kills</u></size>");
+		sb.AppendLine($"{Markup.Prefix} <size=18><u>Top Kills (K/D/A)</u></size>");
 
-		//var message = (DataStore.PlayerStatistics k) => $"{Markup.Highlight(k.LastName)}{pad(k.LastName)}<color={Markup.SecondaryColor}><b>{k.Kills}</b> / {k.Deaths}</color>";
+		const int COL_WIDTH = 5;
+		const string COLOR = Markup.SecondaryColor;
 
-		//TODO this is so ugly fix it but the idea is there 
-		sb.AppendLine($"---. k / d / a\tName");
-		var message = (DataStore.PlayerStatistics k) => $"\t<color={Markup.SecondaryColor}><b>{k.Kills,-3}</b> / <b>{k.Deaths,3}</b> / {k.Assists,3}</color>\t{Markup.Highlight(k.LastName)}";
+		static string GetLine(DataStore.PlayerStatistics s)
+		{
+			string kStr = s.Kills.ToString();
+			string dStr = s.Deaths.ToString();
+			string aStr = s.Assists.ToString();
+			int dSpacing = COL_WIDTH - dStr.Length;
+			int kSpacing = COL_WIDTH - kStr.Length;
+			int aSpacing = COL_WIDTH - aStr.Length;
+
+			return
+				$"<color={COLOR}><b>{PadR(kStr, kSpacing)}</b></color>/" +
+				$"<color={COLOR}><b>{Pad(dStr, dSpacing)}</b></color>/" +
+				$"<color={COLOR}><b>{PadL(aStr, aSpacing)}</b></color>\t" +
+				$"{Markup.Highlight(s.LastName)}";
+		}
+
 
 		for (var i = 0; i < offset; i++)
 		{
 			var k = topKillers[i];
-			sb.AppendLine($"{i + 1}. {message(k)}");
-			//sb.AppendLine($"{i + 1}. {Markup.Highlight(k.LastName.PadRight(1, ' '))}{pad(k.LastName)}{Markup.Secondary(k.LastName.Length)}");
+			sb.AppendLine($"{i + 1}. {GetLine(k)}");
 		}
-
-
 
 		for (var i = offset; i < num; i++)
 		{
 			var k = topKillers[i];
-			sb2.AppendLine($"{i + 1}. {message(k)}");
-			//sb2.AppendLine($"{i + 1}. {Markup.Highlight(k.LastName.PadRight(1, ' '))}{pad(k.LastName)}{Markup.Secondary(k.LastName.Length)}");
+			sb2.AppendLine($"{i + 1}. {GetLine(k)}");
 		}
+
+		//TODO this prints 2 system messages, we should prob just print some header difference to show the difference between the two messages and keep it in one message 
 		ctx.Reply(sb.ToString());
 		ctx.Reply(sb2.ToString());
 	}
