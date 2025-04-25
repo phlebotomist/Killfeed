@@ -58,11 +58,6 @@ AnnounceKillstreak = true
 # Default value: true
 IncludeLevel = true
 
-## Use max gear level instead of current gear level (This will override userMaxPerFightLevel).
-# Setting type: Boolean
-# Default value: false
-UseMaxLevel = false
-
 ## Use max gear used in the current fight.
 # Setting type: Boolean
 # Default value: true

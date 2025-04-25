@@ -11,7 +11,7 @@ internal class Settings
 	internal static bool AnounceUnitKillSteals { get; private set; }
 
 	internal static bool IncludeLevel { get; private set; }
-	internal static bool UseMaxLevel { get; private set; }
+	// internal static bool UseMaxLevel { get; private set; } depricated
 
 	internal static bool UseMaxPerFightLevel { get; private set; }
 
@@ -26,7 +26,7 @@ internal class Settings
 		AnounceUnitKillSteals = config.Bind("General", "AnounceUnitKillSteals", true, "Announce that a player died to a unit while fighting a vampire").Value;
 
 		IncludeLevel = config.Bind("General", "IncludeLevel", true, "Include player gear levels in announcements.").Value;
-		UseMaxLevel = config.Bind("General", "UseMaxLevel", false, "Use max gear level instead of current gear level.").Value;
+		// UseMaxLevel = config.Bind("General", "UseMaxLevel", false, "Use max gear level instead of current gear level.").Value;
 		UseMaxPerFightLevel = config.Bind("General", "UseMaxPerFightLevel", true, "Announce the highest gear level that was used in the fight.").Value;
 		UseDiscordWebhook = config.Bind("General", "UseDiscordWebhook", false, "Announce kills and damage breakdowns in discord (requires setup with hook.txt)").Value;
 		CombatBreakdownDetail = config.Bind("General", "CombatBreakdownDetail", 1, "the level of detail you want to show in the combat report sent to discord. Examples of each type are shown on README").Value;

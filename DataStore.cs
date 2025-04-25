@@ -21,14 +21,12 @@ public class DataStore
 	public record struct PlayerStatistics(ulong SteamId, string LastName, int Kills, int Deaths, int CurrentStreak,
 		int HighestStreak, string LastClanName, int CurrentLevel, int MaxLevel, int Assists)
 	{
-		// lol yikes
 		private static string SafeCSVName(string s) => s.Replace(",", "");
 
 		public string ToCsv() => $"{SteamId},{SafeCSVName(LastName)},{Kills},{Deaths},{CurrentStreak},{HighestStreak},{SafeCSVName(LastClanName)},{CurrentLevel},{MaxLevel},{Assists}";
 
 		public static PlayerStatistics Parse(string csv)
 		{
-			// intentionally naieve and going to blow up so I'll catch it and not get an object for that player and log it
 			var split = csv.Split(',');
 			return new PlayerStatistics()
 			{
@@ -50,14 +48,7 @@ public class DataStore
 			get
 			{
 				var name = Markup.Highlight(LastName);
-				if (Settings.IncludeLevel)
-				{
-					return Settings.UseMaxLevel ? $"{name} ({Markup.Secondary(MaxLevel)}*)" : $"{name} ({Markup.Secondary(CurrentLevel)})";
-				}
-				else
-				{
-					return $"{name}";
-				}
+				return Settings.IncludeLevel ? $"{name} ({Markup.Secondary(CurrentLevel)})" : $"{name}";
 			}
 		}
 	}
