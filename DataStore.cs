@@ -339,7 +339,7 @@ public class DataStore
 				DiscordWebhook.SendFightSummaryAsync(victimUser, killerUser);
 				break;
 			case 3:
-				DiscordWebhook.SendDetailedBreakdownAsync(victimUser.SteamId, victimUser.LastName, killerUser.LastName, filteredHelpers.Keys.ToArray());
+				DiscordWebhook.SendDetailedBreakdownAsync(victimUser, killerUser, filteredHelpers.Keys.ToArray());
 				break;
 			default:
 				break;

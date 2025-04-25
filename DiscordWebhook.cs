@@ -72,6 +72,12 @@ public static class DiscordWebhook
         _ = SendDiscordMessageAsync("testest:" + killerUser.LastName);
     }
 
+
+    private static string GetKillString(PlayerStatistics killer, PlayerStatistics victim)
+    {
+        return $"🗡️ **{killer.LastName}** ({killer.CurrentLevel}) killed **{victim.LastName}** ({victim.CurrentLevel}) ☠️";
+    }
+
     /// <summary>
     /// Builds a simple Markdown kill report and sends it.
     /// </summary>
@@ -82,54 +88,54 @@ public static class DiscordWebhook
 
         var sb = new StringBuilder();
         sb.AppendLine();
-        sb.AppendLine($"🗡️ **{killer.LastName}** ({killer.CurrentLevel}) killed **{victim.LastName}** ({victim.CurrentLevel}) ☠️");
+        sb.AppendLine(GetKillString(killer, victim));
         if (assisters != null && assisters.Length > 0)
             sb.AppendLine($"**Assisters:** {string.Join(", ", assisters)}");
 
         _ = SendDiscordMessageAsync(sb.ToString());
     }
 
-    public static Task SendDetailedBreakdownAsync(
-        ulong victimSteamId,
-        string victimName,
-        string killerName,
+
+    /// <summary>
+    /// sends hit by hit breakdown to the webhook.
+    /// </summary>
+    public static void SendDetailedBreakdownAsync(
+        PlayerStatistics victim,
+        PlayerStatistics killer,
         string[] assisters,
         double pvpWindowSeconds = 30.0)
     {
-        // Header line: who killed and who assisted
+        if (!HookEnabled())
+            return;
+
         var headerSb = new StringBuilder();
-        headerSb.Append($"**⚔️ {killerName} killed {victimName}**");
+        headerSb.Append(GetKillString(killer, victim));
         if (assisters != null && assisters.Length > 0)
         {
             headerSb.Append($" (assisted by {string.Join(", ", assisters)})");
         }
-        headerSb.AppendLine();
 
         // Fetch recent hits
-        var hits = PlayerHitStore.GetRecentInteractions(victimSteamId, pvpWindowSeconds);
-        if (hits.Count == 0)
-        {
-            headerSb.AppendLine($"No interactions to show for **{victimName}** in the last {pvpWindowSeconds:F0}s.");
-            return SendDiscordMessageAsync(headerSb.ToString());
-        }
+        var hits = PlayerHitStore.GetRecentInteractions(victim.SteamId, pvpWindowSeconds);
 
         // Build breakdown lines
         var sb = new StringBuilder();
         sb.AppendLine(headerSb.ToString());
         sb.AppendLine(); // blank line
+        sb.AppendLine($"📊 __hit by hit breakdown breakdown for__ **{victim.LastName}** (last {pvpWindowSeconds:F0}s)");
 
         foreach (var hit in hits)
         {
             var ability = HitNameResolver.Resolve(hit.DmgSourceGUID);
             sb.AppendLine(
-                $"{hit.AttackerName} ({hit.AttackerLevel}) " +
+                $"• **{hit.AttackerName}** ({hit.AttackerLevel}) " +
                 $"hit **{hit.VictimName}** ({hit.VictimLevel}) " +
                 $"with **{ability}**" +
                 $" for **{hit.DmgAmount}** damage"
             );
         }
 
-        return SendDiscordMessageAsync(sb.ToString());
+        _ = SendDiscordMessageAsync(sb.ToString());
     }
 
     public static void SendFightSummaryAsync(
@@ -161,14 +167,11 @@ public static class DiscordWebhook
 
         var sb = new StringBuilder();
 
-        sb.Append($"**⚔️{killer.LastName} killed {victim.LastName}**");
-
-        sb.AppendLine($"**📊 Damage summary for {victim.LastName} (last {pvpWindowSeconds:F0}s)**");
+        sb.AppendLine(GetKillString(killer, victim));
         sb.AppendLine();
-
         if (incoming.Count > 0)
         {
-            sb.AppendLine($"__**Incoming damage**__");
+            sb.AppendLine($"📊 __Incoming damage for__ **{victim.LastName}** (last {pvpWindowSeconds:F0}s)");
             foreach (var kvp in incoming.OrderByDescending(k => k.Value))
                 sb.AppendLine($"• {kvp.Key}: **{kvp.Value:F0}**");
         }
@@ -176,7 +179,7 @@ public static class DiscordWebhook
         if (outgoing.Count > 0)
         {
             sb.AppendLine(); // blank line between the two sections
-            sb.AppendLine($"__**Outgoing damage**__");
+            sb.AppendLine($"📊 __Outgoing damage for__ **{victim.LastName}** (last {pvpWindowSeconds:F0}s)");
             foreach (var kvp in outgoing.OrderByDescending(k => k.Value))
                 sb.AppendLine($"• {kvp.Key}: **{kvp.Value:F0}**");
         }

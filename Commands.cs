@@ -91,7 +91,7 @@ public class Commands
 		_ = DiscordWebhook.SendDiscordMessageAsync("test hook");
 	}
 
-	[Command("change combat breakdown detail level", shortHand: "combatdetail", description: "Shows Killfeed info")]
+	[Command("change combat breakdown detail level", shortHand: "zz", description: "Shows Killfeed info")]
 	public void ChangeCombatBreakdownDetailLevel(ChatCommandContext ctx, string v)
 	{
 		try
