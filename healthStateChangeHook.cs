@@ -64,7 +64,7 @@ public static class TrackVampireAttacksPatch
 
         int sourceDmgGuidHash = GetAbilityGUIDHash(em, statChange.Source);
         int damageAmount = (int)Math.Abs(Math.Round(statChange.Change));
-        p(em, $"damage done: {damageAmount}, reason: {statChange.Reason}");
+        // p(em, $"damage done: {damageAmount}, reason: {statChange.Reason}");
 
 
         PlayerHitStore.AddHit(attackerPlatformId, attackerName, attackerLvl, victimPlatformId, victimName, defenderLvl, sourceDmgGuidHash, damageAmount);

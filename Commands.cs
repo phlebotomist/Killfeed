@@ -33,7 +33,10 @@ public class Commands
 		sb.AppendLine($"{Markup.Prefix} <size=18><u>Top Kills</u></size>");
 
 		//var message = (DataStore.PlayerStatistics k) => $"{Markup.Highlight(k.LastName)}{pad(k.LastName)}<color={Markup.SecondaryColor}><b>{k.Kills}</b> / {k.Deaths}</color>";
-		var message = (DataStore.PlayerStatistics k) => $"\t<color={Markup.SecondaryColor}><b>{k.Kills,-3}</b> / {k.Deaths,3}</color>\t{Markup.Highlight(k.LastName)}";
+
+		//TODO this is so ugly fix it but the idea is there 
+		sb.AppendLine($"---. k / d / a\tName");
+		var message = (DataStore.PlayerStatistics k) => $"\t<color={Markup.SecondaryColor}><b>{k.Kills,-3}</b> / <b>{k.Deaths,3}</b> / {k.Assists,3}</color>\t{Markup.Highlight(k.LastName)}";
 
 		for (var i = 0; i < offset; i++)
 		{
@@ -91,6 +94,7 @@ public class Commands
 
 		sb.AppendLine($"Kills: {Markup.Highlight(stats.Kills)}");
 		sb.AppendLine($"Deaths: {Markup.Highlight(stats.Deaths)}");
+		sb.AppendLine($"Assists: {Markup.Highlight(stats.Assists)}");
 		sb.AppendLine($"Current Streak: {Markup.Highlight(stats.CurrentStreak)}");
 		sb.AppendLine($"Highest Streak: {Markup.Highlight(stats.HighestStreak)}");
 

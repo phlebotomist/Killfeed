@@ -19,12 +19,12 @@ namespace Killfeed;
 public class DataStore
 {
 	public record struct PlayerStatistics(ulong SteamId, string LastName, int Kills, int Deaths, int CurrentStreak,
-		int HighestStreak, string LastClanName, int CurrentLevel, int MaxLevel)
+		int HighestStreak, string LastClanName, int CurrentLevel, int MaxLevel, int Assists)
 	{
 		// lol yikes
 		private static string SafeCSVName(string s) => s.Replace(",", "");
 
-		public string ToCsv() => $"{SteamId},{SafeCSVName(LastName)},{Kills},{Deaths},{CurrentStreak},{HighestStreak},{SafeCSVName(LastClanName)},{CurrentLevel},{MaxLevel}";
+		public string ToCsv() => $"{SteamId},{SafeCSVName(LastName)},{Kills},{Deaths},{CurrentStreak},{HighestStreak},{SafeCSVName(LastClanName)},{CurrentLevel},{MaxLevel},{Assists}";
 
 		public static PlayerStatistics Parse(string csv)
 		{
@@ -40,7 +40,8 @@ public class DataStore
 				HighestStreak = int.Parse(split[5]),
 				LastClanName = split.Length > 6 ? split[6] : "",
 				CurrentLevel = split.Length > 7 ? int.Parse(split[7]) : -1,
-				MaxLevel = split.Length > 8 ? int.Parse(split[8]) : -1
+				MaxLevel = split.Length > 8 ? int.Parse(split[8]) : -1,
+				Assists = split.Length > 9 ? int.Parse(split[9]) : 0
 			};
 		}
 
@@ -61,21 +62,41 @@ public class DataStore
 		}
 	}
 
-	public record struct EventData(ulong VictimId, ulong KillerId, float3 Location, long Timestamp, int VictimLevel, int KillerLevel)
+	public record struct EventData(ulong VictimId, ulong KillerId, float3 Location, long Timestamp, int VictimLevel, int KillerLevel, ulong[] AssistIds)
 	{
-		public string ToCsv() => $"{VictimId},{KillerId},{Location.x},{Location.y},{Location.z},{Timestamp},{VictimLevel},{KillerLevel}";
-
-		public static EventData Parse(string csv)
+		public string ToCsv()
 		{
-			var split = csv.Split(',');
+			string line = $"{VictimId},{KillerId},{Location.x},{Location.y},{Location.z},{Timestamp},{VictimLevel},{KillerLevel}";
+			if (AssistIds.Length > 0)
+				line += "," + string.Join(";", AssistIds);
+			return line;
+		}
+
+		public static EventData Parse(string line)
+		{
+			string[] lineSplit = line.Split(',');
+			string[] assistsSplit = lineSplit.Length > 8 ? lineSplit[8].Split(";") : [];
+			ulong[] assistIds = [];
+			if (assistsSplit.Length > 0)
+			{
+				for (int i = 0; i < assistsSplit.Length; i++)
+				{
+					if (ulong.TryParse(assistsSplit[i], out ulong assistId))
+					{
+						assistIds[i] = assistId;
+					}
+				}
+			}
+
 			return new EventData()
 			{
-				VictimId = ulong.Parse(split[0]),
-				KillerId = ulong.Parse(split[1]),
-				Location = new float3(float.Parse(split[2]), float.Parse(split[3]), float.Parse(split[4])),
-				Timestamp = long.Parse(split[5]),
-				VictimLevel = split.Length > 6 ? int.Parse(split[6]) : 0,
-				KillerLevel = split.Length > 7 ? int.Parse(split[7]) : 0,
+				VictimId = ulong.Parse(lineSplit[0]),
+				KillerId = ulong.Parse(lineSplit[1]),
+				Location = new float3(float.Parse(lineSplit[2]), float.Parse(lineSplit[3]), float.Parse(lineSplit[4])),
+				Timestamp = long.Parse(lineSplit[5]),
+				VictimLevel = lineSplit.Length > 6 ? int.Parse(lineSplit[6]) : 0,
+				KillerLevel = lineSplit.Length > 7 ? int.Parse(lineSplit[7]) : 0,
+				AssistIds = assistIds
 			};
 		}
 	}
@@ -185,14 +206,14 @@ public class DataStore
 		}
 	}
 
-	public static void RegisterKillEvent(PlayerCharacter victim, PlayerCharacter killer, float3 location, int victimLevel, int killerLevel)
+	public static void RegisterKillEvent(PlayerCharacter victim, PlayerCharacter killer, float3 location, int victimLevel, int killerLevel, ulong[] assistIds)
 	{
 		var victimUser = victim.UserEntity.Read<User>();
 		var killerUser = killer.UserEntity.Read<User>();
 
 		// Plugin.Logger.LogWarning($"{victimLevel} {killerLevel}");
 
-		var newEvent = new EventData(victimUser.PlatformId, killerUser.PlatformId, location, DateTime.UtcNow.Ticks, victimLevel, killerLevel);
+		var newEvent = new EventData(victimUser.PlatformId, killerUser.PlatformId, location, DateTime.UtcNow.Ticks, victimLevel, killerLevel, assistIds);
 
 		Events.Add(newEvent);
 
@@ -220,6 +241,17 @@ public class DataStore
 
 		RecordKill(killerUser.PlatformId);
 		var lostStreak = RecordDeath(victimUser.PlatformId);
+		// Record Assists:
+		if (1 == 1) //TODO: this should be the setting for if we recordAssists
+		{
+			foreach (var platformId in assistIds)
+			{
+				if (platformId == killerUser.PlatformId) continue; // skip the killer
+				if (platformId == victimUser.PlatformId) continue; // skip the victim
+				RecordAssist(platformId);
+			}
+
+		}
 
 		AnnounceKill(victimData, killerData, lostStreak);
 
@@ -240,13 +272,26 @@ public class DataStore
 		}
 		return msg;
 	}
-	public static void HandleUnitKillSteal(string victimName, int victimLvl, Dictionary<string, int> assisters)
+	public static void HandleUnitKillSteal(string victimName, int victimLvl, Dictionary<ulong, int> assisters)
 	{
-		Plugin.Logger.LogInfo($"{victimName} was killed by a unit. while fighting: {string.Join(", ", assisters)}");
+		// TODO: need to reimplement this and decide default behavior, should it give assist or kill and if it give kill does it give to most damage or last hit?
+
+		// var victimName = victim.Name.ToString();
+		// var assisters = PlayerHitStore.GetRecentAttackersHighestLevel(victimUser.PlatformId);
+		// if (assisters.Count == 0)
+		// {
+		// Plugin.Logger.LogInfo($"{victim.Name} was killed by a unit, no other vampires involved");
+		// return;
+		// }
+
+		// TODO: get highest level in fight if the setting is enabled
+		// int victimLvl = victimEntity.Has<Equipment>(out var victimGS) ? (int)Math.Round(victimGS.GetFullLevel()) : -1;
+
+		// Plugin.Logger.LogInfo($"{victimName} was killed by a unit. while fighting: {string.Join(", ", assisters)}");
 
 
-		var deathmsg = $"{Markup.Highlight(victimName)} ({Markup.Secondary(victimLvl)}) was killed by a unit while fighting: {GetFormatedAssistString(assisters)}";
-		ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, deathmsg);
+		// var deathmsg = $"{Markup.Highlight(victimName)} ({Markup.Secondary(victimLvl)}) was killed by a unit while fighting: {GetFormatedAssistString(assisters)}";
+		// ServerChatUtils.SendSystemMessageToAllClients(VWorld.Server.EntityManager, deathmsg);
 
 	}
 	private static void AnnounceKill(PlayerStatistics victimUser, PlayerStatistics killerUser, int lostStreakAmount)
@@ -271,12 +316,12 @@ public class DataStore
 			_ => null
 		};
 
-		var helpersDict = PlayerHitStore.GetRecentAttackersHighestLevel(victimUser.SteamId);
+		Dictionary<ulong, (string, int)> helpersDict = PlayerHitStore.GetRecentAttackersWithLvl(victimUser.SteamId);
 
 		// Filter out the killer and format each entry to include the level.
 		var filteredHelpers = helpersDict
-			.Where(x => x.Key != killerUser.LastName)
-			.ToDictionary(x => x.Key, x => x.Value);
+			.Where(x => x.Key != killerUser.SteamId)
+			.ToDictionary(x => x.Value.Item1, x => x.Value.Item2);
 
 
 		var assistsString = GetFormatedAssistString(filteredHelpers);
@@ -311,6 +356,19 @@ public class DataStore
 				// TODO: we need a new formatter for the webhook version of this that uses md not unity's markup
 				// _ = DiscordWebhook.SendDiscordMessageAsync(fullKillSteakMsg);
 			}
+		}
+	}
+
+	private static void RecordAssist(ulong platformId)
+	{
+		if (PlayerDatas.TryGetValue(platformId, out var player))
+		{
+			player.Assists++;
+			PlayerDatas[platformId] = player;
+		}
+		else
+		{
+			PlayerDatas[platformId] = new PlayerStatistics() { Assists = 1, SteamId = platformId };
 		}
 	}
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Bloodstone.API;
 using HarmonyLib;
 using ProjectM;
@@ -51,44 +52,25 @@ public static class VampireDownedHook
 			return;
 		}
 
-		var victim = victimEntity.Read<PlayerCharacter>();
-		var victimUser = victim.UserEntity.Read<User>();
+		PlayerCharacter victim = victimEntity.Read<PlayerCharacter>();
+		User victimUser = victim.UserEntity.Read<User>();
 
-		Plugin.Logger.LogMessage($"{victim.Name} is victim");
-		var unitKiller = killerEntity.Has<UnitLevel>();
-
-		if (unitKiller)
+		// TODO: we have to deal with the sun here as well. But for now this is fine we just check kill steals by units 
+		if (Settings.AnounceUnitKillSteals && killerEntity.Has<UnitLevel>())
 		{
-			if (!Settings.AnounceUnitKillSteals)
-			{
-				Plugin.Logger.LogInfo($"{victim.Name} was killed by a unit but announcement turned off");
-				return;
-			}
-
-			var victimName = victim.Name.ToString();
-			var assisters = PlayerHitStore.GetRecentAttackersHighestLevel(victimUser.PlatformId);
-			if (assisters.Count == 0)
-			{
-				Plugin.Logger.LogInfo($"{victim.Name} was killed by a unit, no other vampires involved");
-				return;
-			}
-
-			// TODO: get highest level in fight if the setting is enabled
-			int victimLvl = victimEntity.Has<Equipment>(out var victimGS) ? (int)Math.Round(victimGS.GetFullLevel()) : -1;
-
-			DataStore.HandleUnitKillSteal(victimName, victimLvl, assisters);
+			// TODO: 
+			// DataStore.HandleUnitKillSteal(victimName, victimLvl, assisters);
 			return;
 		}
 
-		var playerKiller = killerEntity.Has<PlayerCharacter>();
-
-		if (!playerKiller)
+		if (!killerEntity.Has<PlayerCharacter>())
 		{
 			Plugin.Logger.LogWarning($"Killer could not be identified for {victim.Name}, if you know how to reproduce this please contact deca on discord or report on github");
 			return;
 		}
 
-		var killer = killerEntity.Read<PlayerCharacter>();
+		PlayerCharacter killer = killerEntity.Read<PlayerCharacter>();
+		User killerUser = killer.UserEntity.Read<User>();
 
 		if (killer.UserEntity == victim.UserEntity)
 		{
@@ -101,23 +83,18 @@ public static class VampireDownedHook
 		int victimCurrentLevel = victimEntity.Has<Equipment>(out var victimEquipment) ? (int)Math.Round(victimEquipment.GetFullLevel()) : -1;
 		int killerCurrentLevel = killerEntity.Has<Equipment>(out var killerEquipment) ? (int)Math.Round(killerEquipment.GetFullLevel()) : -1;
 
-
+		ulong[] assistIds = [];
 		if (Settings.UseMaxPerFightLevel)
 		{
-			// var attackerUser = killer.UserEntity.Read<User>();
-			var attackers = PlayerHitStore.GetRecentAttackersHighestLevel(victimUser.PlatformId);
-			// TODO: we prob want to be using a steamID to key this map incase names are changed while fights are happening
-			if (attackers.TryGetValue(killer.Name.ToString(), out var maxLevel))
+			Dictionary<ulong, (string, int)> attackers = PlayerHitStore.GetRecentAttackersWithLvl(victimUser.PlatformId);
+			assistIds = [.. attackers.Keys];
+			if (attackers.TryGetValue(killerUser.PlatformId, out (string, int) name_lvl))
 			{
-				killerCurrentLevel = maxLevel;
-			}
-			else
-			{
-				killerCurrentLevel = -100;
+				killerCurrentLevel = name_lvl.Item2;
 			}
 		}
 
 
-		DataStore.RegisterKillEvent(victim, killer, location.Position, victimCurrentLevel, killerCurrentLevel);
+		DataStore.RegisterKillEvent(victim, killer, location.Position, victimCurrentLevel, killerCurrentLevel, assistIds);
 	}
 }

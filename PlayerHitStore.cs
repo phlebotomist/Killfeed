@@ -102,35 +102,41 @@ public static class PlayerHitStore
         return [];
     }
 
-    //returns a map of attacker names to their highest level in the last pvpWindowSeconds seconds 
-    public static Dictionary<string, int> GetRecentAttackersHighestLevel(
+    /// <summary>
+    /// Returns a dictionary mapping each attacker’s Steam ID to (name, highest level)
+    /// for all hits on the target player within the last <paramref name="pvpWindowSeconds"/> seconds, excluding self-hits.
+    /// </summary>
+    public static Dictionary<ulong, (string Name, int Level)> GetRecentAttackersWithLvl(
         ulong playerSteamId,
         double pvpWindowSeconds = PVP_WINDOW)
     {
-        var result = new Dictionary<string, int>();
+        var result = new Dictionary<ulong, (string, int)>();
+
         if (!interactionsByPlayer.TryGetValue(playerSteamId, out var hitData))
             return result;
 
         long currentTicks = Stopwatch.GetTimestamp();
         long windowTicks = (long)(pvpWindowSeconds * Stopwatch.Frequency);
 
-        foreach (var hit in hitData.Defenses)
+        foreach (HitInteraction hit in hitData.Defenses)
         {
-            if (currentTicks - hit.Timestamp <= windowTicks)
+            if (currentTicks - hit.Timestamp > windowTicks) continue;
+
+            if (playerSteamId == hit.AttackerSteamId) continue; // skip self-hits
+
+            if (result.TryGetValue(hit.AttackerSteamId, out (string, int) name_lvl))
             {
-                if (result.TryGetValue(hit.AttackerName, out int existingLevel))
-                {
-                    if (hit.AttackerLevel > existingLevel)
-                        result[hit.AttackerName] = hit.AttackerLevel;
-                }
-                else
-                {
-                    result[hit.AttackerName] = hit.AttackerLevel;
-                }
+                if (hit.AttackerLevel > name_lvl.Item2)
+                    result[hit.AttackerSteamId] = (hit.AttackerName, hit.AttackerLevel);
+            }
+            else
+            {
+                result[hit.AttackerSteamId] = (hit.AttackerName, hit.AttackerLevel);
             }
         }
         return result;
     }
+
     /// <summary>
     /// Returns all hit interactions (both attacks and defenses) for the given player
     /// that occurred within the 'pvpWindowSeconds' seconds,

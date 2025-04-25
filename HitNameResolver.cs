@@ -9,11 +9,14 @@ namespace Killfeed
     {
         private static readonly Dictionary<int, string> _guidToName = new()
         {
+            // myabe we should load these in from a file so admins can make custom names?
             { 1998252380, "Shadowbolt"},
             {706730253, "Frenzy"},
             {-1733898626, "Axe melee 1"},
             {-1192587580, "Axe melee 2"},
             {-1064937884, "Axe melee 3"},
+            {705543074, "X-Strike"},
+            {1784649791,"X-Strike"},
             {-1274932233, "ExplosiveShot"},
             {728144325 ,"ExplosiveShot explosion"}
         };
