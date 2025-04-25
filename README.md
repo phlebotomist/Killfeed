@@ -1,20 +1,35 @@
 ![](logo.png)
-# Killfeed - PvP Announcer and Statistics
+
+# PvPBreakdown - PvP Leaderboard, Killfeed, and post fight breakdowns
 
 ## Features
+
 - Announce PvP kills in chat
-- Kill Leaderboard
+- PvP Leaderboard
 - Killstreak Leaderboard
 - Death Leaderboard
 - Announce kill streaks
-- Optionally announce max level each used in the fight
+- Track Player PvP assists
+- Announce max level used in the fight (works with weapon swapping)
 - Optionally announce player assists
-- Optionally announce kill steals by mobs
-- Discord webhook integration
- 
-## Upcoming features
-- Announce multi-kills
-- Track by clan
+- Optionally announce PVP kill steals by mobs
+- Discord webhook integration for making announcements
+- Full post fight breakdown of who hit who with what abilities (webhook only)
+- Post fight summary giving summarized breakdown of damage taken in fight (webhook only)
+
+## RoadMap
+
+- More detailed death messages when units kill steal
+- Specific message when sun kill steals
+- Option to give assist, kill, or neither when units kill steal
+- Reward system that can be set by admins for hitting pvp benchmarks
+- Custom Chat messaging when gear scrore gap is high
+- Gank (at VBloods) detection and custom messaging in chat when players die to ganks
+- Get clan based stats
+
+## Known Issues
+
+- Player's using unstuck during fight will not be tracked in any way by the mod
 
 ## Setttings
 
@@ -55,14 +70,20 @@ UseMaxPerFightLevel = true
 
 ```
 
+# credits and thanks:
+
+    This mod is based on Deca's https://thunderstore.io/c/v-rising/p/deca/Killfeed/
+    Want to give thanks to Deca for all his work making kf, bloodstone, and vfc. Additionally everyone in the VrisingModing discord who has helped with my endless questions.
+
+# Support:
+
+- I go by `Morphine` on the Vrising modding discord
+- Additionally feel free to open issues on the github
+
 ## https://vrisingmods.com/discord
 
-# Changelog
-- 0.3.1
-	- Added new options to show level, and if so to show current or maximum level
-- 0.2.1
-	- Fixed confusing plugin ID, **important:** the config file was `com.deca.Bloodstone.cfg` it will now use `gg.deca.Killfeed.cfg`
-- 0.2.0
-	- Update for 1.0
-- 0.1.0
-	- Initial release
+# Pull Requests:
+
+- It is highly encouraged you open an issue before putting in the work to make a pull request.
+  That being said I'm open to looking and reviewing at the time of writing this so feel free to open suggestions or bug reports.
+- I will try to be quick to respond
