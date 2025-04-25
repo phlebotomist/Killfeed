@@ -55,7 +55,6 @@ public static class VampireDownedHook
 		PlayerCharacter victim = victimEntity.Read<PlayerCharacter>();
 		User victimUser = victim.UserEntity.Read<User>();
 
-		// TODO: we have to deal with the sun here as well. But for now this is fine we just check kill steals by units 
 		if (Settings.AnounceUnitKillSteals && killerEntity.Has<UnitLevel>())
 		{
 			// TODO: 
