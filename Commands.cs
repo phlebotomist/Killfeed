@@ -1,30 +1,12 @@
 using System;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using Cpp2IL.Core.Extensions;
-using ProjectM;
-using ProjectM.Network;
 using VampireCommandFramework;
 
 namespace PvPDetails;
 
 public class Commands
 {
-	public static string Pad(string s, int n)
-	{
-		return new string(' ', n) + s + new string(' ', n);
-	}
-
-	public static string PadR(string s, int n)
-	{
-		return s + new string(' ', n);
-	}
-	public static string PadL(string s, int n)
-	{
-		return new string(' ', n) + s;
-	}
-
 	[Command("leaderboard", shortHand: "kf top")]
 	public void TopCommand(ChatCommandContext ctx)
 	{
@@ -55,9 +37,9 @@ public class Commands
 			int aSpacing = COL_WIDTH - aStr.Length;
 
 			return
-				$"<color={COLOR}><b>{PadR(kStr, kSpacing)}</b></color>/" +
-				$"<color={COLOR}><b>{Pad(dStr, dSpacing)}</b></color>/" +
-				$"<color={COLOR}><b>{PadL(aStr, aSpacing)}</b></color>\t" +
+				$"<color={COLOR}><b>{Helpers.PadR(kStr, kSpacing)}</b></color>/" +
+				$"<color={COLOR}><b>{Helpers.Pad(dStr, dSpacing)}</b></color>/" +
+				$"<color={COLOR}><b>{Helpers.PadL(aStr, aSpacing)}</b></color>\t" +
 				$"{Markup.Highlight(s.LastName)}";
 		}
 

@@ -24,10 +24,9 @@ public class PlayerHitData
     public List<HitInteraction> Defenses { get; } = new List<HitInteraction>();
 }
 
-// Static, in-memory store for all player hit interactions.
 public static class PlayerHitStore
 {
-    private const double PVP_WINDOW = 30.0; // seconds
+    private const double PVP_WINDOW = 30.0;
 
     private static readonly Dictionary<ulong, PlayerHitData> interactionsByPlayer =
         new Dictionary<ulong, PlayerHitData>();
@@ -122,7 +121,7 @@ public static class PlayerHitStore
         {
             if (currentTicks - hit.Timestamp > windowTicks) continue;
 
-            if (playerSteamId == hit.AttackerSteamId) continue; // skip self-hits
+            if (playerSteamId == hit.AttackerSteamId) continue;
 
             if (result.TryGetValue(hit.AttackerSteamId, out (string, int) name_lvl))
             {

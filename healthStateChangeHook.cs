@@ -13,11 +13,6 @@ namespace PvPDetails;
 [HarmonyPatch(typeof(StatChangeSystem), "ApplyHealthChangeToEntity")]
 public static class TrackVampireAttacksPatch
 {
-    public static void p(EntityManager em, string msg)
-    {
-        ServerChatUtils.SendSystemMessageToAllClients(em, msg);
-    }
-
     private static int GetAbilityGUIDHash(EntityManager em, Entity dmgSource)
     {
         if (dmgSource != Entity.Null && em.HasComponent<PrefabGUID>(dmgSource))

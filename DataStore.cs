@@ -1,19 +1,13 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using Backtrace.Unity.Common;
 using Bloodstone.API;
 using Il2CppSystem.Linq;
 using ProjectM;
 using ProjectM.Network;
-using Unity.Collections;
 using Unity.Mathematics;
-using UnityEngine.Jobs;
 using Random = System.Random;
-using Microsoft.VisualBasic;
-using Unity.Entities.UniversalDelegates;
 
 namespace PvPDetails;
 public class DataStore
@@ -210,8 +204,6 @@ public class DataStore
 	{
 		var victimUser = victim.UserEntity.Read<User>();
 		var killerUser = killer.UserEntity.Read<User>();
-
-		// Plugin.Logger.LogWarning($"{victimLevel} {killerLevel}");
 
 		var newEvent = new EventData(victimUser.PlatformId, killerUser.PlatformId, location, DateTime.UtcNow.Ticks, victimLevel, killerLevel, assistIds);
 
