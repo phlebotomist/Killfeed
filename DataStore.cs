@@ -70,11 +70,18 @@ public class DataStore
 			ulong[] assistIds = [];
 			if (assistsSplit.Length > 0)
 			{
-				for (int i = 0; i < assistsSplit.Length; i++)
+				foreach (var assistStr in assistsSplit)
 				{
-					if (ulong.TryParse(assistsSplit[i], out ulong assistId))
+					try
 					{
-						assistIds[i] = assistId;
+						if (ulong.TryParse(assistStr, out ulong assistId))
+						{
+							assistIds.Append(assistId);
+						}
+					}
+					catch (Exception e)
+					{
+						Plugin.Logger.LogError($"Failed to parse assist id: \"{assistStr}\" with error: \"{e}\"");
 					}
 				}
 			}
@@ -166,8 +173,9 @@ public class DataStore
 			{
 				Events.Add(EventData.Parse(line));
 			}
-			catch (Exception)
+			catch (Exception e)
 			{
+				Plugin.Logger.LogError($"EEE: \"{e}\"");
 				Plugin.Logger.LogError($"Failed to parse event line: \"{line}\"");
 			}
 		}
