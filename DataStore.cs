@@ -316,7 +316,7 @@ public class DataStore
 		var assistsString = GetFormatedAssistString(filteredHelpers);
 		if (filteredHelpers.Count > 0)
 		{
-			message += $" with help from: {assistsString}";
+			message += $" With help from: {assistsString}";
 		}
 
 		var fullKillMessage = Markup.Prefix + message;
