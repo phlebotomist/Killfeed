@@ -19,7 +19,8 @@ namespace PvPDetails
             {705543074, "X-Strike"},
             {1784649791,"X-Strike"},
             {-1274932233, "ExplosiveShot"},
-            {728144325 ,"ExplosiveShot explosion"}
+            {728144325 ,"ExplosiveShot explosion"},
+            {853298599, "silver sickness"}
         };
 
         /// <summary>
