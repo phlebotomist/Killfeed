@@ -67,21 +67,22 @@ public class DataStore
 		{
 			string[] lineSplit = line.Split(',');
 			string[] assistsSplit = lineSplit.Length > 8 ? lineSplit[8].Split(";") : [];
-			ulong[] assistIds = [];
+			ulong[] assistIds = new ulong[assistsSplit.Length];
 			if (assistsSplit.Length > 0)
 			{
-				foreach (var assistStr in assistsSplit)
+				for (int i = 0; i < assistsSplit.Length; i++)
 				{
 					try
 					{
-						if (ulong.TryParse(assistStr, out ulong assistId))
+						if (ulong.TryParse(assistsSplit[i], out ulong assistId))
 						{
-							assistIds.Append(assistId);
+							assistIds[i] = assistId;
 						}
+
 					}
 					catch (Exception e)
 					{
-						Plugin.Logger.LogError($"Failed to parse assist id: \"{assistStr}\" with error: \"{e}\"");
+						Plugin.Logger.LogError($"Failed to parse assist id: \"{assistsSplit[i]}\" with error: \"{e}\"");
 					}
 				}
 			}
