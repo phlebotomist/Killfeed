@@ -24,6 +24,7 @@
 - Get clan based stats
 - Record healing as well as damage values
 - collect stats on sieges
+- Keep stats on overall damage done
 
 ## Known Issues
 
