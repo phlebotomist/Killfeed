@@ -25,10 +25,12 @@
 - Record healing as well as damage values
 - collect stats on sieges
 - Keep stats on overall damage done
+- Incorperate ability casts for non damage spells into hit log
 
 ## Known Issues
 
 - Player's dying to sun, silver, or unstuck do not go towards kills or kill steals at the moment.
+- Spells that don't do damage will not show up directly on the discord recap
 
 ## Setttings
 
