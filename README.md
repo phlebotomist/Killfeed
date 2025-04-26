@@ -4,16 +4,12 @@
 
 ## Features
 
-- Announce PvP kills in chat
-- PvP Leaderboard
-- Killstreak Leaderboard
-- Death Leaderboard
-- Announce kill streaks
-- Track Player PvP assists
+- Announce PvP kills and assists in chat
+- PvP Leaderboard with Kills/Deaths/Assists
+- Track and annunce kill streaks
 - Announce max level used in the fight (works with weapon swapping)
-- Optionally announce player assists
-- Optionally announce PVP kill steals by mobs
-- Discord webhook integration for making announcements
+- Announce PVP kill steals by mobs
+- Discord webhook integration for making kill announcements
 - Full post fight breakdown of who hit who with what abilities (webhook only)
 - Post fight summary giving summarized breakdown of damage taken in fight (webhook only)
 
