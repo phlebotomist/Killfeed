@@ -69,6 +69,7 @@ public static class DiscordWebhook
     {
         if (!HookEnabled())
             return;
+        // TODO: this gets lumped into the kill message because the time is so close the name trick for discord doesn't work. Because of this we need to addd a specific name change 
         _ = SendDiscordMessageAsync("testest:" + killerUser.LastName);
     }
 
