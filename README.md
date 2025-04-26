@@ -57,6 +57,16 @@ AnnounceKillstreak = true
 # Setting type: Boolean
 # Default value: true
 IncludeLevel = true
+
+## Wether or not to send messages to the discord webhook (web hook needs to be set up)
+# Setting type: Boolean
+# Default value: true
+UseDiscordWebhook = true
+
+## The level of detail to go into for death recaps
+# Setting type: Int32
+# Default value: 2
+CombatBreakdownDetail = 2
 ```
 
 # credits and thanks:
