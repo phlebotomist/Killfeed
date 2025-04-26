@@ -137,6 +137,35 @@ public static class PlayerHitStore
     }
 
     /// <summary>
+    /// Returns a the highest level used by victim attacking the killer
+    /// for all hits within the last <paramref name="pvpWindowSeconds"/> seconds.
+    /// </summary>
+    public static int GetHighestLvlUsedOnKiller(
+        ulong victimSteamId,
+        ulong killerSteamId,
+        double pvpWindowSeconds = PVP_WINDOW)
+    {
+        int peakLevel = -1;
+
+        if (!interactionsByPlayer.TryGetValue(victimSteamId, out var hitData))
+            return peakLevel;
+
+        long currentTicks = Stopwatch.GetTimestamp();
+        long windowTicks = (long)(pvpWindowSeconds * Stopwatch.Frequency);
+
+        foreach (HitInteraction hit in hitData.Attacks)
+        {
+            if (currentTicks - hit.Timestamp > windowTicks) continue;
+
+            if (killerSteamId == hit.VictimSteamId)
+            {
+                peakLevel = Math.Max(peakLevel, hit.AttackerLevel);
+            }
+        }
+        return peakLevel;
+    }
+
+    /// <summary>
     /// Returns all hit interactions (both attacks and defenses) for the given player
     /// that occurred within the 'pvpWindowSeconds' seconds,
     /// sorted by timestamp (oldest first).

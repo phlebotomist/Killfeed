@@ -20,7 +20,7 @@ public static class VampireDownedHook
 		foreach (var entity in downedEvents)
 		{
 			ProcessVampireDowned(entity);
-			CleanupVampireHits(entity); // clean up hit data so if they are revived assists don't bleed over into next fight
+			CleanupVampireHits(entity);
 		}
 	}
 
@@ -93,6 +93,8 @@ public static class VampireDownedHook
 			killerCurrentLevel = name_lvl.Item2;
 		}
 
+		int peakLvlInFight = PlayerHitStore.GetHighestLvlUsedOnKiller(victimUser.PlatformId, killerUser.PlatformId);
+		victimCurrentLevel = Math.Max(peakLvlInFight, victimCurrentLevel);
 
 		DataStore.RegisterKillEvent(victim, killer, location.Position, victimCurrentLevel, killerCurrentLevel, assistIds);
 	}
