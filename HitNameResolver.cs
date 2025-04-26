@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 
-namespace Killfeed
+
+namespace PvPDetails
 {
     /// <summary>
     /// Resolves prefab GUIDs to human-readable ability/weapon names.
@@ -9,7 +10,7 @@ namespace Killfeed
     {
         private static readonly Dictionary<int, string> _guidToName = new()
         {
-            // myabe we should load these in from a file so admins can make custom names?
+            // myabe we should load these in from a file so admins can make custom names? TODO: load these from a file
             { 1998252380, "Shadowbolt"},
             {706730253, "Frenzy"},
             {-1733898626, "Axe melee 1"},

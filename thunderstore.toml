@@ -2,11 +2,11 @@
 schemaVersion = "0.0.1"
 
 [package]
-namespace = "deca"
-name = "Killfeed"
+namespace = "morphine"
+name = "PvPDetails"
 versionNumber = "0.2.0"
-description = "PvP Leaderboard and Killfeed Announcements"
-websiteUrl = "https://github.com/decaprime/Killfeed"
+description = "PvP Leaderboard, killfeed, and post fight breakdowns."
+websiteUrl = "https://github.com/phlebotomist/Killfeed"
 containsNsfwContent = false
 
 [package.dependencies]

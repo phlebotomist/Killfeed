@@ -6,7 +6,7 @@ using HarmonyLib;
 using Steamworks;
 using VampireCommandFramework;
 
-namespace Killfeed;
+namespace PvPDetails;
 
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
 [BepInDependency("gg.deca.VampireCommandFramework")]

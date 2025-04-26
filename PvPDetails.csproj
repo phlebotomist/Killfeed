@@ -2,17 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <AssemblyName>Killfeed</AssemblyName>
-    <Description>PvP Leaderboard and Killfeed Announcements.</Description>
+    <AssemblyName>PvPDetails</AssemblyName>
+    <Description>PvP Leaderboard, Killfeed, and Post fight breakdowns.</Description>
     <Version>1.0.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
-    <RootNamespace>Killfeed</RootNamespace>
-    <BepInExPluginGuid>gg.deca.Killfeed</BepInExPluginGuid>
+    <RootNamespace>PvPDetails</RootNamespace>
+    <BepInExPluginGuid>phlebotomist.morphine.PvPDetails</BepInExPluginGuid>
   </PropertyGroup>
-  <!-- Copy Killfeed.dll to /dist -->
+  <!-- Copy PvPDetails.dll to /dist -->
 	<Target Name="Thunderstore Copy to Dist" AfterTargets="AfterBuild" Condition=" '$(Configuration)' == 'Release'">
-		<Copy SourceFiles="$(OutDir)\Killfeed.dll" DestinationFolder="$(ProjectDir)/dist" />
+		<Copy SourceFiles="$(OutDir)\PvPDetails.dll" DestinationFolder="$(ProjectDir)/dist" />
 	</Target>
   <ItemGroup>
     <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.691" IncludeAssets="compile" />

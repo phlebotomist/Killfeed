@@ -1,7 +1,7 @@
 using System;
 using BepInEx.Configuration;
 
-namespace Killfeed;
+namespace PvPDetails;
 
 internal class Settings
 {

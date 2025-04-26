@@ -8,7 +8,7 @@ using ProjectM.Network;
 using Stunlock.Core;
 using Unity.Entities;
 
-namespace Killfeed;
+namespace PvPDetails;
 
 [HarmonyPatch(typeof(StatChangeSystem), "ApplyHealthChangeToEntity")]
 public static class TrackVampireAttacksPatch

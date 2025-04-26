@@ -9,7 +9,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
 
-namespace Killfeed;
+namespace PvPDetails;
 
 [HarmonyPatch(typeof(VampireDownedServerEventSystem), nameof(VampireDownedServerEventSystem.OnUpdate))]
 public static class VampireDownedHook

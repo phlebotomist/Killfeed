@@ -1,6 +1,6 @@
 using VampireCommandFramework;
 
-namespace Killfeed;
+namespace PvPDetails;
 
 internal static class Markup
 {

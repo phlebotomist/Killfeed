@@ -6,9 +6,9 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using static Killfeed.DataStore;
+using static PvPDetails.DataStore;
 
-namespace Killfeed;
+namespace PvPDetails;
 
 public static class DiscordWebhook
 {

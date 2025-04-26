@@ -15,7 +15,7 @@ using Random = System.Random;
 using Microsoft.VisualBasic;
 using Unity.Entities.UniversalDelegates;
 
-namespace Killfeed;
+namespace PvPDetails;
 public class DataStore
 {
 	public record struct PlayerStatistics(ulong SteamId, string LastName, int Kills, int Deaths, int CurrentStreak,
@@ -121,10 +121,10 @@ public class DataStore
 	}
 
 	private const string EVENTS_FILE_NAME = "events.v1.csv";
-	private const string EVENTS_FILE_PATH = $"BepInEx/config/Killfeed/{EVENTS_FILE_NAME}";
+	private const string EVENTS_FILE_PATH = $"BepInEx/config/PvPDetails/{EVENTS_FILE_NAME}";
 
 	private const string STATS_FILE_NAME = "stats.v1.csv";
-	private const string STATS_FILE_PATH = $"BepInEx/config/Killfeed/{STATS_FILE_NAME}";
+	private const string STATS_FILE_PATH = $"BepInEx/config/PvPDetails/{STATS_FILE_NAME}";
 
 	public static void WriteToDisk()
 	{

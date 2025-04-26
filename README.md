@@ -22,6 +22,8 @@
 - Custom Chat messaging when gear scrore gap is high
 - Gank (at VBloods) detection and custom messaging in chat when players die to ganks
 - Get clan based stats
+- Record healing as well as damage values
+- collect stats on sieges
 
 ## Known Issues
 

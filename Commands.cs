@@ -7,7 +7,7 @@ using ProjectM;
 using ProjectM.Network;
 using VampireCommandFramework;
 
-namespace Killfeed;
+namespace PvPDetails;
 
 public class Commands
 {
